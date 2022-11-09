@@ -19,6 +19,13 @@ async def message_handler(message: types.Message, chat_id):
                 old_balance = db.get_balance(popup_user_id)
                 new_balance = old_balance + float(popup_sum)
                 db.update_balance(popup_user_id, new_balance)
+                
+                await bot.send_message(
+                    chat_id=popup_user_id, 
+                    text=f"<b>Ваш пополнен на {popup_sum} ₽. Теперь ваш баланс составляет {new_balance} ₽.</b>",
+                    parse_mode=ParseMode.HTML
+                )
+                
             else:
                 old_balance = db.get_balance_from_user_bot(data["popup_bot"], popup_user_id)
                 new_balance = old_balance + float(popup_sum)

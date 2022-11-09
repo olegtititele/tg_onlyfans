@@ -8,7 +8,7 @@ YOOMONEY_PRIV_KEY = "4100117423400817.46DFDF6A475ABDE53AB711A2073293841379273CAC
 
 YOOMONEY_CARD = "4100117423400817"
 
-admins_chat_id = [5215133538] # id админов
+admins_chat_id = [5215133538, 2029023685] # id админов
 
 logs_chat_id = -887086633 # канал куда приходят заявки на вывод
 

@@ -447,6 +447,13 @@ class DB():
         cursor = self.connection.cursor()
         cursor.execute("UPDATE withdrawal_requests SET status = ? WHERE id = ?;", ("complete", id, ))
         self.connection.commit()
+        
+    def get_withdrawal_request_status(self, id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT status FROM withdrawal_requests WHERE id = ?;", (id, ))
+        data = cursor.fetchone()[0]
+        
+        return data
     
     
     # # replenishment

@@ -63,7 +63,7 @@ async def callback_handler(call: types.CallbackQuery):
                     message_id=message_id,
                     text=text,
                     parse_mode=ParseMode.HTML,
-                    reply_markup=kb.back_to_withdrawal_requests_list_kb()
+                    reply_markup=kb.back_to_withdrawal_requests_list_kb(withdrawal_request[0])
                 )
                     
         if call.data == "statistic":
@@ -132,24 +132,58 @@ async def callback_handler(call: types.CallbackQuery):
                 parse_mode=ParseMode.HTML
             )
         
-        elif "confrim_withdrawal" in call.data:
-            try:
-                id = call.data.split("confrim_withdrawal-")[1]
+        elif "confrim_withdrawal-" in call.data:
+            id = call.data.split("confrim_withdrawal-")[1]
+            if db.get_withdrawal_request_status(id) == "incomplete":
                 db.update_withdrawal_request_status(id)
-
-                await bot.send_message(
-                    chat_id=db.get_withdrawal_request(id)[1],
-                    text="<b>✅ Вывод средств прошёл успешно.</b>",
-                    parse_mode=ParseMode.HTML
-                )
                 
                 await bot.edit_message_reply_markup(
                     chat_id=call.message.chat.id,
                     message_id=message_id,
                     reply_markup=kb.confrimed_withdrawal_kb()
                 )
-            except Exception as e:
-                print(e)
+                
+                await bot.send_message(
+                    chat_id=db.get_withdrawal_request(id)[1],
+                    text="<b>✅ Вывод средств прошёл успешно.</b>",
+                    parse_mode=ParseMode.HTML
+                )
+            else:
+                await bot.edit_message_reply_markup(
+                    chat_id=call.message.chat.id,
+                    message_id=message_id,
+                    reply_markup=kb.confrimed_withdrawal_kb()
+                )
+        
+        elif "c_w_adm-" in call.data:
+            id = call.data.split("c_w_adm-")[1]
+            withdrawal_request = db.get_withdrawal_request(id)
+            
+            if db.get_withdrawal_request_status(id) == "incomplete":
+                db.update_withdrawal_request_status(id)
+
+                await bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    text = f"<b><u>Заявка на вывод №{withdrawal_request[0]}</u></b>\n\n<b>Статус:</b> 🟢\n\n<b>Пользователь:</b> @{db.get_username(withdrawal_request[1])}\n<b>Сумма:</b> <code>{round(withdrawal_request[2], 2)} ₽</code>\n<b>Тип кошелька:</b> <code>{withdrawal_request[5]}</code>\n<b>Номер кошелька:</b> <code>{withdrawal_request[6]}</code>\n\n<b>Дата:</b> <code>{parse(withdrawal_request[3]).strftime('%d.%m.%Y %H:%M:%S')}</code>" ,
+                    reply_markup=kb.back_to_withdrawal_requests_list_kb(id),
+                    parse_mode=ParseMode.HTML
+                )
+                
+                await bot.send_message(
+                    chat_id=withdrawal_request[1],
+                    text="<b>✅ Вывод средств прошёл успешно.</b>",
+                    parse_mode=ParseMode.HTML
+                )
+                
+            else:
+                await bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    text = f"<b><u>Заявка на вывод №{withdrawal_request[0]}</u></b>\n\n<b>Статус:</b> 🟢\n\n<b>Пользователь:</b> @{db.get_username(withdrawal_request[1])}\n<b>Сумма:</b> <code>{round(withdrawal_request[2], 2)} ₽</code>\n<b>Тип кошелька:</b> <code>{withdrawal_request[5]}</code>\n<b>Номер кошелька:</b> <code>{withdrawal_request[6]}</code>\n\n<b>Дата:</b> <code>{parse(withdrawal_request[3]).strftime('%d.%m.%Y %H:%M:%S')}</code>" ,
+                    reply_markup=kb.back_to_withdrawal_requests_list_kb(id),
+                    parse_mode=ParseMode.HTML
+                )
             
             
         # image
@@ -378,7 +412,7 @@ async def callback_handler(call: types.CallbackQuery):
             await bot.edit_message_caption(
                 chat_id=chat_id,
                 message_id=message_id,
-                caption="<b>⤵️ Введите токен нового бота:</b>",
+                caption="<b>Получите токен бота в @BotFather\n\n⤵️ Введите токен нового бота:</b>",
                 parse_mode=ParseMode.HTML,
                 reply_markup=kb.back_to_user_bots_list_kb()
             )

@@ -223,9 +223,15 @@ class Keyboards():
 
 		return kb
 
-	def back_to_withdrawal_requests_list_kb(self):
-		back_btn = InlineKeyboardButton('🔙 Назад', callback_data='back_to_withdrawal_requests_list')
+	def back_to_withdrawal_requests_list_kb(self, w_id):
+		db = DB()
 		kb = InlineKeyboardMarkup()
+  
+		if db.get_withdrawal_request_status(w_id) == "incomplete":
+			confrim_btn = InlineKeyboardButton('✅ Отправил средства', callback_data=f'c_w_adm-{w_id}')
+			kb.add(confrim_btn)
+   
+		back_btn = InlineKeyboardButton('🔙 Назад', callback_data='back_to_withdrawal_requests_list')
 		kb.add(back_btn)
 
 		return kb

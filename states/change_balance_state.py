@@ -31,12 +31,6 @@ async def message_handler(message: types.Message, chat_id):
                 parse_mode=ParseMode.HTML
             )
             
-            await bot.send_message(
-                chat_id=popup_user_id, 
-                text=f"<b>Ваш пополнен на {popup_sum} ₽. Теперь баланс пользователя составляет {new_balance} ₽.</b>",
-                parse_mode=ParseMode.HTML
-            )
-            
             db.update_state(chat_id, states.main_state)
         else:
             await bot.send_message(

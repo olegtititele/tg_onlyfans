@@ -133,20 +133,23 @@ async def callback_handler(call: types.CallbackQuery):
             )
         
         elif "confrim_withdrawal" in call.data:
-            id = call.data.split("confrim_withdrawal-")[1]
-            db.update_withdrawal_request_status(id)
-            
-            await bot.edit_message_reply_markup(
-                chat_id=call.message.chat.id,
-                message_id=message_id,
-                reply_markup=kb.confrimed_withdrawal_kb()
-            )
-            
-            await bot.send_message(
-                chat_id=db.get_withdrawal_request(id)[1],
-                text="<b>✅ Вывод средств прошёл успешно.</b>",
-                parse_mode=ParseMode.HTML
-            )
+            try:
+                id = call.data.split("confrim_withdrawal-")[1]
+                db.update_withdrawal_request_status(id)
+
+                await bot.edit_message_reply_markup(
+                    chat_id=call.message.chat.id,
+                    message_id=message_id,
+                    reply_markup=kb.confrimed_withdrawal_kb()
+                )
+
+                await bot.send_message(
+                    chat_id=db.get_withdrawal_request(id)[1],
+                    text="<b>✅ Вывод средств прошёл успешно.</b>",
+                    parse_mode=ParseMode.HTML
+                )
+            except Exception as e:
+                print(e)
             
             
         # image

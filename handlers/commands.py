@@ -48,7 +48,13 @@ async def command_start(message: types.Message):
                     text=f"<b>➕ У вас новый реферал!</b>",
                     parse_mode=ParseMode.HTML
                 )
-                
+            
+            for admin_id in cf.admins_chat_id:
+                await bot.send_message(
+                    chat_id=admin_id,
+                    text=f"<b>👤 Зарегистрирован новый пользователь:</b> @{message.from_user.username}",
+                    parse_mode=ParseMode.HTML
+                )
                 
             return await bot.send_message(
                 chat_id=chat_id,
@@ -70,7 +76,7 @@ async def command_admin(message: types.Message):
             return await bot.send_document(message.chat.id, f)
           
         
-        text = f"<b><u>Профиль</u></b>\n\n<b>👋 Саламалейкум, @{message.from_user.username}!</b>\n\n<b>🏦 Всего пополнений во всех ботах:</b> <code>{db.get_total_replenishment()} ₽</code>\n\n<b>🤖 Всего ботов:</b> <code>{len(db.get_all_users_bots())}</code>\n\n<b>💯 Процент комиссии:</b> <code>{db.get_commission_percentage()}%</code>\n\n<b>💯 Процент реферала с комиссии:</b> <code>{db.get_referal_bonus()}%</code>"
+        text = f"<b><u>Профиль</u></b>\n\n<b>👋 Саламалейкум, @{message.from_user.username}!</b>\n\n<b>🏦 Всего пополнений во всех ботах:</b> <code>{db.get_total_replenishment()} ₽</code>\n\n<b>🤖 Всего ботов:</b> <code>{len(db.get_all_users_bots())}</code>\n\n<b>💯 Процент комиссии:</b> <code>{db.get_commission_percentage()}%</code>\n\n<b>💯 Процент реферала с комиссии:</b> <code>{db.get_referal_bonus()}%</code>\n\n<b>💯 Процент реферала в боте пользователя:</b> <code>{db.get_referal_bonus_in_user_bot()}%</code>"
         
         await bot.send_message(
             chat_id=message.chat.id,

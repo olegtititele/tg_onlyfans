@@ -18,6 +18,7 @@ import states.input_card_number_state as input_card_number_state
 import states.input_withdrawal_amount_state as input_withdrawal_amount_state
 import states.change_commission_percentage_state as change_commission_percentage_state
 import states.change_releral_bonus_state as change_releral_bonus_state
+import states.change_ref_in_user_bot_state as change_ref_in_user_bot_state
 
 async def message_handler(message: types.Message):
     db = DB()
@@ -95,6 +96,16 @@ async def message_handler(message: types.Message):
                 text="<b>⤵️ Введите новый процент реферала:</b>",
                 parse_mode=ParseMode.HTML
             )
+            
+    elif message.text == "💯 Реферал в боте пользователя":
+        if chat_id in cf.admins_chat_id:
+            db.update_state(chat_id, states.change_ref_in_user_bot)
+            
+            return await bot.send_message(
+                chat_id=chat_id, 
+                text="<b>⤵️ Введите новый процент реферала в боте пользователя:</b>",
+                parse_mode=ParseMode.HTML
+            )
     
     elif message.text == "✉️ Рассылка":
         if chat_id in cf.admins_chat_id:
@@ -166,7 +177,12 @@ async def message_handler(message: types.Message):
     
     elif current_state == states.change_referal_bonus:
         await change_releral_bonus_state.message_handler(message, chat_id)
-            
+    
+    elif current_state == states.change_ref_in_user_bot:
+        await change_ref_in_user_bot_state.message_handler(message, chat_id)
+    
+    else:
+        return
   
 
 

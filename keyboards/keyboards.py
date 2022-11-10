@@ -35,6 +35,7 @@ class Keyboards():
 		show_bots_list_btn = KeyboardButton('📃 Посмотреть список ботов')
 		change_proc_btn = KeyboardButton('💯 Комиссия')
 		change_ref_btn = KeyboardButton('💯 Реферал')
+		change_ref_in_user_bot_btn = KeyboardButton('💯 Реферал в боте пользователя')
 		withdrawal_requests_btn = KeyboardButton('🏦 Заявки на вывод')
 		popup_balance_btn = KeyboardButton('💰 Зачислить баланс')
 		alert_btn = KeyboardButton('✉️ Рассылка')
@@ -45,6 +46,7 @@ class Keyboards():
   
 		kb.add(show_bots_list_btn)
 		kb.add(change_proc_btn, change_ref_btn)
+		kb.add(change_ref_in_user_bot_btn)
 		kb.add(alert_btn, popup_balance_btn)
 		kb.add(withdrawal_requests_btn)
 

@@ -15,7 +15,7 @@ class DB():
 
     def create_users_table(self):
         cursor = self.connection.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS users (user_id BIGINT PRIMARY KEY, username TEXT, state TEXT, status TEXT, balance REAL, current_bot TEXT, invited_by TEXT, current_material BLOB, storage TEXT);''')
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS users (user_id BIGINT PRIMARY KEY, username TEXT, state TEXT, status TEXT, balance REAL, current_bot TEXT, invited_by TEXT, current_material BLOB, storage TEXT, invited_time TIMESTAMP);''')
         self.connection.commit()
 
     def add_user(self, user_id, username, invited_by):
@@ -26,7 +26,7 @@ class DB():
         current_bot = None
         current_material = None
         storage = {}
-        cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id, username, state, status, balance, current_bot, invited_by, current_material, json.dumps(storage), ))
+        cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id, username, state, status, balance, current_bot, invited_by, current_material, json.dumps(storage), datetime.now(), ))
         self.connection.commit()
         
     def check_if_user_exists(self, user_id):
@@ -132,7 +132,17 @@ class DB():
         data = cursor.fetchall()
         return data
         
+    def get_today_new_users(self):
+        cursor = self.connection.cursor()
+        users = self.get_all_users()
+        today = 0
         
+        for user in users:
+            time = parse(cursor.execute("SELECT invited_time FROM users WHERE user_id = ?;", (user[0],)).fetchone()[0])
+            if datetime.now() + timedelta(days=-1) <= time:
+                today += 1
+                
+        return today
     
     
     # # bot information
@@ -140,9 +150,9 @@ class DB():
     def create_bot_information_table(self):
         try:
             cursor = self.connection.cursor()
-            cursor.execute(f'''CREATE TABLE bot_information (commission_percentage INT, referal_bonus INT, qiwi_api TEXT);''')
+            cursor.execute(f'''CREATE TABLE bot_information (commission_percentage INT, referal_bonus INT, referal_bonus_in_user_bot INT);''')
             self.connection.commit()
-            cursor.execute("INSERT INTO bot_information VALUES (?, ?, ?)", (15, 10, None, ))
+            cursor.execute("INSERT INTO bot_information VALUES (?, ?, ?)", (15, 10, 5, ))
             self.connection.commit()
         except:
             pass
@@ -169,16 +179,27 @@ class DB():
         cursor.execute("UPDATE bot_information SET referal_bonus = ?;", (percentage,))
         self.connection.commit()
         
-    def get_qiwi_api(self):
+    def get_referal_bonus_in_user_bot(self):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT qiwi_api FROM bot_information;")
+        cursor.execute("SELECT referal_bonus_in_user_bot FROM bot_information;")
         data = cursor.fetchone()[0]
         return data
     
-    def update_qiwi_api(self, qiwi_api):
+    def update_referal_bonus_in_user_bot(self, percentage):
         cursor = self.connection.cursor()
-        cursor.execute("UPDATE bot_information SET qiwi_api = ?;", (qiwi_api,))
+        cursor.execute("UPDATE bot_information SET referal_bonus_in_user_bot = ?;", (percentage,))
         self.connection.commit()
+        
+    # def get_qiwi_api(self):
+    #     cursor = self.connection.cursor()
+    #     cursor.execute("SELECT qiwi_api FROM bot_information;")
+    #     data = cursor.fetchone()[0]
+    #     return data
+    
+    # def update_qiwi_api(self, qiwi_api):
+    #     cursor = self.connection.cursor()
+    #     cursor.execute("UPDATE bot_information SET qiwi_api = ?;", (qiwi_api,))
+    #     self.connection.commit()
         
         
         
@@ -273,6 +294,31 @@ class DB():
         cursor = self.connection.cursor()
         cursor.execute("UPDATE users_bots SET video_price = ? WHERE bot_username = ?", (price, bot_username,))
         self.connection.commit()
+        
+    def get_today_new_bots(self):
+        user_bots = self.get_all_users_bots()
+        total = 0
+        
+        for user_bot in user_bots:
+            bot_username = user_bot[0]
+            created_time = self.get_user_bot_created_time(bot_username)
+
+            if datetime.now() + timedelta(days=-1) <= created_time:
+                total += 1
+                
+        return total
+    
+    def get_today_users_user_bots(self):
+        user_bots = self.get_all_users_bots()
+        today = 0
+        
+        for user_bot in user_bots:
+            bot_username = user_bot[0]
+            for user in self.get_subscriptions_from_user_bot(bot_username):
+                if datetime.now() + timedelta(days=-1) <= parse(user[1]):
+                    today += 1
+                
+        return today
         
     
     
@@ -460,12 +506,12 @@ class DB():
     
     def create_replenishment_table(self):
         cursor = self.connection.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS replenishment (user_id BIGINT, sum REAL);''')
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS replenishment (user_id BIGINT, sum REAL, time TIMESTAMP);''')
         self.connection.commit()
         
     def add_new_replenishment(self, user_id, sum):
         cursor = self.connection.cursor()
-        cursor.execute("INSERT INTO replenishment VALUES (?, ?)", (user_id, sum, ))
+        cursor.execute("INSERT INTO replenishment VALUES (?, ?, ?)", (user_id, sum, datetime.now(), ))
         self.connection.commit()
     
     def get_total_replenishment(self):
@@ -478,6 +524,21 @@ class DB():
             total_replenishment += sum[0]
             
         return total_replenishment
+    
+    def get_today_replenishment(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM replenishment;")
+        data = cursor.fetchall()
+        today = 0
+        
+        for rep in data:
+            sum = int(rep[1])
+            time = parse(rep[2])
+
+            if datetime.now() + timedelta(days=-1) <= time:
+                today += sum
+                
+        return today
     
 
     # # photos table
@@ -648,6 +709,12 @@ class DB():
         cursor = self.connection.cursor()
         cursor.execute(f"UPDATE {bot_username} SET balance = ? WHERE user_id = ?", (balance, user_id, ))
         self.connection.commit()
+        
+    def get_invited_by_from_user_bot(self, bot_username, user_id):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT invited_by FROM {bot_username} WHERE user_id = ?;", (user_id,))
+        data = cursor.fetchone()[0]
+        return data
         
     def get_invited_users_from_user_bot(self, bot_username, user_id):
         cursor = self.connection.cursor()

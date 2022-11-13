@@ -723,3 +723,24 @@ class DB():
         return data
 
 
+
+
+
+# yoomoney labels
+
+    def create_yoomoney_labels_table(self):
+        cursor = self.connection.cursor()
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS yoomoney_labels (label TEXT);''')
+        self.connection.commit()
+
+    def add_label(self, label):
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO yoomoney_labels VALUES (?)", (label, ))
+        self.connection.commit()
+        
+    def get_all_labels(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT label FROM yoomoney_labels;")
+        data = cursor.fetchall()
+        
+        return data

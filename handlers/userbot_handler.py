@@ -2,6 +2,7 @@ import asyncio
 import binascii
 import json
 import os
+import uuid
 from datetime import datetime, timedelta
 
 import aiohttp
@@ -362,10 +363,10 @@ async def check_message(token, message):
             
         elif state == "popup_balance_yoomoney":
             try:
-                if float(message_text.replace(',', '.')) > 5:
+                if float(message_text.replace(',', '.')) > 1:
                     yoomoney = YooMoney()
-                    bill_id = binascii.b2a_hex(os.urandom(15))
-                    
+                    bill_id = generate_random_label()
+
                     pay_url = yoomoney.make_bill(bill_id, message_text, f"@{bot_username}")
                     
                     keyboard = {
@@ -464,11 +465,10 @@ async def check_qiwi_popup(token, chat_id, username, bot_username, bill_id):
     
 async def check_yoomoney_popup(token, chat_id, username, bot_username, bill_id, popup_sum):
     start_time = datetime.now()
-    
+    yoomoney =  YooMoney()
     while True:
-        
-        payment_status = YooMoney().check_payment(bill_id)
-
+        payment_status = yoomoney.operation_info(bill_id)
+        print(payment_status)
         if payment_status == "success":
             db = DB()
             referal_id = db.get_invited_by_from_user_bot(bot_username, chat_id)
@@ -520,6 +520,16 @@ async def check_yoomoney_popup(token, chat_id, username, bot_username, bill_id, 
             else:
                 await asyncio.sleep(10)
 
+
+def generate_random_label():
+    while True:
+        db = DB()
+        label = uuid.uuid4().hex
+        
+        if label not in db.get_all_labels():
+            db.add_label(label)
+            return label
+    
 
 async def run(token):
     try:

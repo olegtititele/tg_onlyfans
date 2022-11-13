@@ -1,6 +1,6 @@
 import config.config as cf
 from yoomoney import Client, Quickpay
-
+import json
 
 class YooMoney(object):
     def __init__(self):
@@ -14,15 +14,21 @@ class YooMoney(object):
             targets=comment,
             paymentType="SB",
             sum=amount,
-            label=bill_id
+            label=str(bill_id)
         )
         
         return quickpay.base_url
         
 
-    def check_payment(self, bill_id):
-        client = Client(self.YOOMONEY_PRIV_KEY)
-        history = client.operation_history(label=bill_id)
-    
-        for operation in history.operations:
-            return operation.status
+    def operation_info(self, bill_id):
+        try:
+            client = Client(self.YOOMONEY_PRIV_KEY)
+            history_operations = client.operation_history(label=str(bill_id)).operations
+            
+            if len(history_operations) == 0:
+                return "not_paid"
+            else:
+                for operation in history_operations:
+                    return operation.status
+        except:
+            return "not_paid"

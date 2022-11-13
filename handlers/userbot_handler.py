@@ -468,7 +468,7 @@ async def check_yoomoney_popup(token, chat_id, username, bot_username, bill_id, 
     yoomoney =  YooMoney()
     while True:
         payment_status = yoomoney.operation_info(bill_id)
-        print(payment_status)
+
         if payment_status == "success":
             db = DB()
             referal_id = db.get_invited_by_from_user_bot(bot_username, chat_id)

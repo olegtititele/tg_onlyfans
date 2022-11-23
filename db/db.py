@@ -13,7 +13,7 @@ class DB():
 
     def add_column(self):
         cursor = self.connection.cursor()
-        cursor.execute(f'''ALTER TABLE users ADD subscription_time TIMESTAMP DEFAULT {datetime.now()};''')
+        cursor.execute(f'''ALTER TABLE users ADD subscription_time TIMESTAMP DEFAULT `{datetime.now()}`;''')
         # cursor.execute("ALTER TABLE users DROP COLUMN;")
         self.connection.commit()
     # # user

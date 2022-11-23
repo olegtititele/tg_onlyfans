@@ -609,7 +609,7 @@ class DB():
 #         cursor = self.connection.cursor()
 #         cursor.execute(f'''ALTER TABLE photos_table ADD id TEXT;''')
 #         self.connection.commit()
-        
+        cursor = self.connection.cursor()
         for photo in self.get_all_photos():
             while True:
                 id = binascii.b2a_hex(os.urandom(25)).decode()
@@ -617,7 +617,7 @@ class DB():
                 if id not in self.get_all_photos_id():
                     break
             
-            cursor = self.connection.cursor()
+            
 
             cursor.execute("UPDATE photos_table SET id = ? WHERE photo = ?;", [id, photo[0]])
             self.connection.commit()
@@ -706,7 +706,7 @@ class DB():
 #         cursor = self.connection.cursor()
 #         cursor.execute(f'''ALTER TABLE videos_table ADD id TEXT;''')
 #         self.connection.commit()
-        
+        cursor = self.connection.cursor()
         for video in self.get_all_videos():
             while True:
                 id = binascii.b2a_hex(os.urandom(25)).decode()
@@ -714,7 +714,7 @@ class DB():
                 if id not in self.get_all_videos_id():
                     break
             
-            cursor = self.connection.cursor()
+           
             cursor.execute("UPDATE videos_table SET id = ? WHERE video = ?;", [id, video[0]])
             self.connection.commit()
     

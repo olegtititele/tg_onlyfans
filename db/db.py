@@ -703,9 +703,9 @@ class DB():
     def add_column_in_videos_table(self):
         import binascii
         import os
-#         cursor = self.connection.cursor()
-#         cursor.execute(f'''ALTER TABLE videos_table ADD id TEXT;''')
-#         self.connection.commit()
+        cursor = self.connection.cursor()
+        cursor.execute(f'''ALTER TABLE videos_table ADD id TEXT;''')
+        self.connection.commit()
         cursor = self.connection.cursor()
         for video in self.get_all_videos():
             while True:

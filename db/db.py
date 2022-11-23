@@ -606,14 +606,14 @@ class DB():
     def add_column_in_photos_table(self):
         import binascii
         import os
-        cursor = self.connection.cursor()
-        cursor.execute(f'''ALTER TABLE photos_table ADD id TEXT;''')
-        self.connection.commit()
+#         cursor = self.connection.cursor()
+#         cursor.execute(f'''ALTER TABLE photos_table ADD id TEXT;''')
+#         self.connection.commit()
         
         for photo in self.get_all_photos():
             while True:
                 id = binascii.b2a_hex(os.urandom(25)).decode()
-                
+                print(id)
                 if id not in self.get_all_photos_id():
                     break
             
@@ -703,14 +703,14 @@ class DB():
     def add_column_in_videos_table(self):
         import binascii
         import os
-        cursor = self.connection.cursor()
-        cursor.execute(f'''ALTER TABLE videos_table ADD id TEXT;''')
-        self.connection.commit()
+#         cursor = self.connection.cursor()
+#         cursor.execute(f'''ALTER TABLE videos_table ADD id TEXT;''')
+#         self.connection.commit()
         
         for video in self.get_all_videos():
             while True:
                 id = binascii.b2a_hex(os.urandom(25)).decode()
-                
+                print(id)
                 if id not in self.get_all_videos_id():
                     break
             

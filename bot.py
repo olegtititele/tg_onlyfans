@@ -29,7 +29,7 @@ async def bot_on_start():
 #     db.add_referal_balnce_column()
 #     db.drop_bot_information()
 #     db.add_column_in_photos_table()
-    db.add_column_in_videos_table()
+#     db.add_column_in_videos_table()
     db.create_yoomoney_labels_table()
     db.create_bot_information_table()
     db.create_withdrawal_requests_table()

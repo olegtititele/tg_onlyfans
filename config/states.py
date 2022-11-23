@@ -13,3 +13,4 @@ class States():
     change_commission_percentage = "change_commission_percentage"
     change_referal_bonus = "change_referal_bonus"
     change_ref_in_user_bot = "change_ref_in_user_bot"
+    start_referal_sum = "start_referal_sum"

@@ -4,7 +4,7 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            ReplyKeyboardRemove)
 from dateutil.parser import parse
 from db.db import DB
-
+import config.config as cf
 from keyboards.scroll_keyboard import ScrollKeyboard
 
 height = 9
@@ -18,24 +18,58 @@ class Keyboards():
 
 	def menu_button_kb(self):
 		profile_btn = KeyboardButton('👤 Профиль 👤')
+		premium_btn = KeyboardButton('💎 Премиум 💎')
 		ref_btn = KeyboardButton('👥 Реферальная система 👥')
 		my_bots_btn = KeyboardButton('🤖 Мои боты 🤖')
 		
 		main_menu_kb = ReplyKeyboardMarkup(
 			resize_keyboard=True, one_time_keyboard=False
 		)
-  
-		main_menu_kb.add(profile_btn)
+
+
+		main_menu_kb.add(profile_btn, premium_btn)
 		main_menu_kb.add(ref_btn)
 		main_menu_kb.add(my_bots_btn)
 
 		return main_menu_kb
+
+	def premium_price_kb(self):
+		first_btn = InlineKeyboardButton(f'1 месяц / {cf.price_for_one_month} ₽', callback_data=f'one_month_price')
+		second_btn = InlineKeyboardButton(f'3 месяца / {cf.price_for_three_month} ₽', callback_data=f'three_month_price')
+		third_btn = InlineKeyboardButton(f'6 месяцев / {cf.price_for_six_month} ₽', callback_data=f'six_month_price')
+		kb = InlineKeyboardMarkup()
+		kb.row(first_btn)
+		kb.row(second_btn)
+		kb.row(third_btn)
+
+		return kb
+
+	def payment_methods_kb(self):
+		popup_qiwi = InlineKeyboardButton('🥝 QIWI', callback_data=f'popup_qiwi')
+		popup_ym = InlineKeyboardButton('👛 YOOMONEY', callback_data=f'popup_yoomoney')
+		popup_from_balance = InlineKeyboardButton(f'💳 Баланс ', callback_data=f'popup_from_balance')
+		back_btn = InlineKeyboardButton('🔙 Назад', callback_data='back_to_premium')
+		kb = InlineKeyboardMarkup()
+		kb.row(popup_qiwi)
+		kb.row(popup_ym)
+		kb.row(popup_from_balance)
+		kb.row(back_btn)
+
+		return kb
+
+	def pay_kb(self, pay_url):
+		popup_btn = InlineKeyboardButton('Оплатить', url=f'{pay_url}')
+		kb = InlineKeyboardMarkup()
+		kb.row(popup_btn)
+  
+		return kb
 
 	def admin_kb(self):
 		show_bots_list_btn = KeyboardButton('📃 Посмотреть список ботов')
 		change_proc_btn = KeyboardButton('💯 Комиссия')
 		change_ref_btn = KeyboardButton('💯 Реферал')
 		change_ref_in_user_bot_btn = KeyboardButton('💯 Реферал в боте пользователя')
+		start_referal_btn = KeyboardButton('💯 Реферал при старте')
 		withdrawal_requests_btn = KeyboardButton('🏦 Заявки на вывод')
 		popup_balance_btn = KeyboardButton('💰 Зачислить баланс')
 		alert_btn = KeyboardButton('✉️ Рассылка')
@@ -47,6 +81,7 @@ class Keyboards():
 		kb.add(show_bots_list_btn)
 		kb.add(change_proc_btn, change_ref_btn)
 		kb.add(change_ref_in_user_bot_btn)
+		kb.add(start_referal_btn)
 		kb.add(alert_btn, popup_balance_btn)
 		kb.add(withdrawal_requests_btn)
 
@@ -175,8 +210,6 @@ class Keyboards():
 		kb.add(back_btn)
   
 		return kb
-
-
  
 	def withdrawal_requests_kb(self, page):
 		buttons = {}
@@ -196,6 +229,20 @@ class Keyboards():
 		kb = scroll_kb.render_keyboard()
   
 		return kb, pages
+
+	def delete_img_kb(self, id):
+		decline_btn = InlineKeyboardButton('⛔️ Удалить', callback_data=f'del_img-{id}')
+		kb = InlineKeyboardMarkup()
+		kb.row(decline_btn)
+
+		return kb
+
+	def delete_video_kb(self, id):
+		decline_btn = InlineKeyboardButton('⛔️ Удалить', callback_data=f'del_vid-{id}')
+		kb = InlineKeyboardMarkup()
+		kb.row(decline_btn)
+
+		return kb
 
 	def back_to_user_bots_list_kb(self):
 		back_btn = InlineKeyboardButton('🔙 Назад', callback_data='back_to_user_bots_list')

@@ -7,7 +7,7 @@ from create_bot import bot
 from keyboards.keyboards import *
 from telegram import ParseMode
 
-import handlers.userbot_handler as us_bot
+import handlers.tg_user_bot.userbot_handler as us_bot
 
 
 async def message_handler(message: types.Message, chat_id):

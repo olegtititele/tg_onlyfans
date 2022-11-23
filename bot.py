@@ -1,15 +1,16 @@
 import asyncio
 import logging
+from datetime import datetime
 from threading import *
 
 import aioschedule
 from aiogram import executor
 from telegram import ParseMode
 
-import handlers.userbot_handler as us_bot
+import handlers.tg_user_bot.userbot_handler as us_bot
 from create_bot import bot, dp
 from db.db import DB
-from handlers import callback_handler, commands, message_handler
+from handlers.tg_constructor_bot import callback_handler, commands, message_handler
 from keyboards.keyboards import *
 
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +24,13 @@ callback_handler.register_handlers_client(dp)
 
 async def bot_on_start():
     db = DB()
+    
+    db.add_column()
+    db.add_referal_balnce_column()
+    db.drop_bot_information()
+    db.add_column_in_photos_table()
+    db.add_column_in_videos_table()
+    db.create_unverified_material_table()
     db.create_yoomoney_labels_table()
     db.create_bot_information_table()
     db.create_withdrawal_requests_table()
@@ -54,12 +62,15 @@ async def admin_today_alert():
         except:
             continue
 
-async def scheduler():
-    aioschedule.every().day.at("20:00").do(admin_today_alert)
-    
+async def scheduler():    
     while True:
-        await aioschedule.run_pending()
-        await asyncio.sleep(1)
+        time = datetime.now().strftime("%H:%M")
+        
+        if time == "20:00":
+            await admin_today_alert()
+            await asyncio.sleep(79200)
+        else:
+            await asyncio.sleep(5)
         
     
     

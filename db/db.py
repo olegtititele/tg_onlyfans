@@ -11,11 +11,16 @@ class DB():
         self.connection = sqlite3.connect("database.db")
 
 
+    def add_column(self):
+        cursor = self.connection.cursor()
+        cursor.execute(f'''ALTER TABLE users ADD subscription_time TIMESTAMP DEFAULT {datetime.now()};''')
+        # cursor.execute("ALTER TABLE users DROP COLUMN;")
+        self.connection.commit()
     # # user
 
     def create_users_table(self):
         cursor = self.connection.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS users (user_id BIGINT PRIMARY KEY, username TEXT, state TEXT, status TEXT, balance REAL, current_bot TEXT, invited_by TEXT, current_material BLOB, storage TEXT, invited_time TIMESTAMP);''')
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS users (user_id BIGINT PRIMARY KEY, username TEXT, state TEXT, status TEXT, balance REAL, current_bot TEXT, invited_by TEXT, current_material BLOB, storage TEXT, invited_time TIMESTAMP, subscription_time TIMESTAMP);''')
         self.connection.commit()
 
     def add_user(self, user_id, username, invited_by):
@@ -26,7 +31,7 @@ class DB():
         current_bot = None
         current_material = None
         storage = {}
-        cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id, username, state, status, balance, current_bot, invited_by, current_material, json.dumps(storage), datetime.now(), ))
+        cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id, username, state, status, balance, current_bot, invited_by, current_material, json.dumps(storage), datetime.now(), datetime.now(), ))
         self.connection.commit()
         
     def check_if_user_exists(self, user_id):
@@ -144,15 +149,59 @@ class DB():
                 
         return today
     
+    def get_subscription_time(self, user_id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT subscription_time FROM users WHERE user_id = ?;", (user_id,))
+        minutes = ((datetime.now() - parse(cursor.fetchone()[0])).total_seconds() / 60) * (-1)
+        
+        if minutes <= 0:
+            return 0
+        
+        return minutes
+    
+    def update_subscription_time(self, user_id, premium_duration):
+        cursor = self.connection.cursor()
+        subscription_time = parse(cursor.execute("SELECT subscription_time FROM users WHERE user_id = ?;", (user_id,)).fetchone()[0])
+        
+        if subscription_time < datetime.now():
+            new_subscription_time = datetime.now() + timedelta(days=premium_duration*30)
+        else:
+            new_subscription_time = subscription_time + timedelta(days=premium_duration*30)
+            
+            
+        cursor.execute("UPDATE users SET subscription_time = ? WHERE user_id = ?", (new_subscription_time, user_id,))
+        self.connection.commit()
+    
+    def get_all_users_with_premium(self):
+        users = self.get_all_users()
+        premium_users = 0
+        
+        for user in users:
+            sub_time = self.get_subscription_time(user[0])
+            
+            if sub_time > 0:
+                premium_users += 1
+        
+        
+        return premium_users
+    
+    
+    
+    
     
     # # bot information
     
+    def drop_bot_information(self):
+        cursor = self.connection.cursor()
+        cursor.execute(f'''DROP TABLE bot_information;''')
+        self.connection.commit()
+        
     def create_bot_information_table(self):
         try:
             cursor = self.connection.cursor()
-            cursor.execute(f'''CREATE TABLE bot_information (commission_percentage INT, referal_bonus INT, referal_bonus_in_user_bot INT);''')
+            cursor.execute(f'''CREATE TABLE bot_information (commission_percentage INT, referal_bonus INT, referal_bonus_in_user_bot INT, start_referal_sum REAL);''')
             self.connection.commit()
-            cursor.execute("INSERT INTO bot_information VALUES (?, ?, ?)", (15, 10, 5, ))
+            cursor.execute("INSERT INTO bot_information VALUES (?, ?, ?, ?)", (15, 10, 5, 20))
             self.connection.commit()
         except:
             pass
@@ -188,6 +237,17 @@ class DB():
     def update_referal_bonus_in_user_bot(self, percentage):
         cursor = self.connection.cursor()
         cursor.execute("UPDATE bot_information SET referal_bonus_in_user_bot = ?;", (percentage,))
+        self.connection.commit()
+    
+    def get_start_referal_sum_in_user_bot(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT start_referal_sum FROM bot_information;")
+        data = cursor.fetchone()[0]
+        return data
+    
+    def update_start_referal_sum_in_user_bot(self, sum):
+        cursor = self.connection.cursor()
+        cursor.execute("UPDATE bot_information SET start_referal_sum = ?;", (sum,))
         self.connection.commit()
         
     # def get_qiwi_api(self):
@@ -301,7 +361,7 @@ class DB():
         
         for user_bot in user_bots:
             bot_username = user_bot[0]
-            created_time = self.get_user_bot_created_time(bot_username)
+            created_time = parse(self.get_user_bot_created_time(bot_username))
 
             if datetime.now() + timedelta(days=-1) <= created_time:
                 total += 1
@@ -543,22 +603,55 @@ class DB():
 
     # # photos table
     
+    def add_column_in_photos_table(self):
+        import binascii
+        import os
+        cursor = self.connection.cursor()
+        cursor.execute(f'''ALTER TABLE photos_table ADD id TEXT;''')
+        self.connection.commit()
+        
+        for photo in self.get_all_photos():
+            while True:
+                id = binascii.b2a_hex(os.urandom(25)).decode()
+                
+                if id not in self.get_all_photos_id():
+                    break
+            
+            cursor = self.connection.cursor()
+
+            cursor.execute("UPDATE photos_table SET id = ? WHERE photo = ?;", [id, photo[0]])
+            self.connection.commit()
+    
     def create_photos_table(self):
         cursor = self.connection.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS photos_table (photo BLOB, bot_username TEXT, viewed_users TEXT);''')
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS photos_table (photo BLOB, bot_username TEXT, viewed_users TEXT, id TEXT);''')
         self.connection.commit()
         
         
-    def add_photo(self, photo, bot_username):
+    def add_photo(self, photo, bot_username, id):
         viewed_users = []
         cursor = self.connection.cursor()
-        cursor.execute("INSERT INTO photos_table VALUES (?, ?, ?)", (photo, bot_username, json.dumps(viewed_users), ))
+        cursor.execute("INSERT INTO photos_table VALUES (?, ?, ?, ?)", (photo, bot_username, json.dumps(viewed_users), id, ))
         self.connection.commit()
+        
+    def get_photo(self, id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT photo FROM photos_table WHERE id = ?;", (id,))
+        data = cursor.fetchone()[0]
+        
+        return data
         
     def get_user_bot_photos(self, bot_username):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT photo FROM photos_table WHERE bot_username = ?;", (bot_username,))
+        cursor.execute("SELECT id FROM photos_table WHERE bot_username = ?;", (bot_username,))
         data = cursor.fetchall()
+        
+        return data
+    
+    def get_photo_info(self, id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT bot_username FROM photos_table WHERE id = ?;", (id,))
+        data = cursor.fetchone()[0]
         
         return data
     
@@ -573,9 +666,9 @@ class DB():
                 
         return total_images
     
-    def delete_photo(self, bot_username, photo):
+    def delete_photo(self, id):
         cursor = self.connection.cursor()
-        cursor.execute("DELETE FROM photos_table WHERE bot_username = ? AND photo = ?;", (bot_username, photo, ))
+        cursor.execute("DELETE FROM photos_table WHERE id = ?;", (id, ))
         self.connection.commit()
         
     def get_viewed_users_on_photo(self, bot_username, photo):
@@ -591,26 +684,69 @@ class DB():
         self.connection.commit()
     
     
+    def get_all_photos(self):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT photo FROM photos_table;")
+        data = cursor.fetchall()
+        return data
+    
+    def get_all_photos_id(self):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT id FROM photos_table;")
+        data = cursor.fetchall()
+        return data
+    
     
     
     # # videos table
     
+    def add_column_in_videos_table(self):
+        import binascii
+        import os
+        cursor = self.connection.cursor()
+        cursor.execute(f'''ALTER TABLE videos_table ADD id TEXT;''')
+        self.connection.commit()
+        
+        for video in self.get_all_videos():
+            while True:
+                id = binascii.b2a_hex(os.urandom(25)).decode()
+                
+                if id not in self.get_all_videos_id():
+                    break
+            
+            cursor = self.connection.cursor()
+            cursor.execute("UPDATE videos_table SET id = ? WHERE video = ?;", [id, video[0]])
+            self.connection.commit()
+    
     def create_videos_table(self):
         cursor = self.connection.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS videos_table (video BLOB, bot_username TEXT, viewed_users TEXT);''')
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS videos_table (video BLOB, bot_username TEXT, viewed_users TEXT, id TEXT);''')
         self.connection.commit()
-        
-        
-    def add_video(self, video, bot_username):
+               
+    def add_video(self, video, bot_username, id):
         viewed_users = []
         cursor = self.connection.cursor()
-        cursor.execute("INSERT INTO videos_table VALUES (?, ?, ?)", (video, bot_username, json.dumps(viewed_users), ))
+        cursor.execute("INSERT INTO videos_table VALUES (?, ?, ?, ?)", (video, bot_username, json.dumps(viewed_users), id,))
         self.connection.commit()
+        
+    def get_video(self, id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT video FROM videos_table WHERE id = ?;", (id,))
+        data = cursor.fetchone()[0]
+        
+        return data
         
     def get_user_bot_videos(self, bot_username):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT video FROM videos_table WHERE bot_username = ?;", (bot_username,))
+        cursor.execute("SELECT id FROM videos_table WHERE bot_username = ?;", (bot_username,))
         data = cursor.fetchall()
+        
+        return data
+    
+    def get_video_info(self, id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT bot_username FROM videos_table WHERE id = ?;", (id,))
+        data = cursor.fetchone()[0]
         
         return data
     
@@ -625,9 +761,9 @@ class DB():
                 
         return total_videos
     
-    def delete_video(self, bot_username, video):
+    def delete_video(self, id):
         cursor = self.connection.cursor()
-        cursor.execute("DELETE FROM videos_table WHERE bot_username = ? AND video = ?;", (bot_username, video, ))
+        cursor.execute("DELETE FROM videos_table WHERE id = ?;", (id, ))
         self.connection.commit()
         
     def get_viewed_users_on_video(self, bot_username, video):
@@ -641,16 +777,35 @@ class DB():
         cursor = self.connection.cursor()
         cursor.execute("UPDATE videos_table SET viewed_users = ? WHERE bot_username = ? AND video = ?;", (json.dumps(viewed_users), bot_username, video,))
         self.connection.commit()
-    
 
+    def get_all_videos(self):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT video FROM videos_table;")
+        data = cursor.fetchall()
+        return data
+    
+    def get_all_videos_id(self):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT id FROM videos_table;")
+        data = cursor.fetchall()
+        return data
 
 
 
     # # user_bot
     
+    def add_referal_balnce_column(self):
+        user_bots = self.get_all_users_bots()
+        
+        for user_bot in user_bots:
+            bot_username = user_bot[0]
+            cursor = self.connection.cursor()
+            cursor.execute(f'''ALTER TABLE {bot_username} ADD referal_balance REAL DEFAULT {0};''')
+            self.connection.commit()
+    
     def create_bot_table(self, bot_username):
         cursor = self.connection.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS {bot_username} (user_id BIGINT PRIMARY KEY, username TEXT, reg_date TIMESTAMP, state TEXT, balance REAL, invited_by TEXT);''')
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS {bot_username} (user_id BIGINT PRIMARY KEY, username TEXT, reg_date TIMESTAMP, state TEXT, balance REAL, invited_by TEXT, referal_balance REAL);''')
         self.connection.commit()
         
     def add_new_user_in_user_bot(self, bot_username, user_id, username, invited_by):
@@ -658,7 +813,8 @@ class DB():
         reg_date = datetime.now()
         state = "main_state"
         balance = 0
-        cursor.execute(f"INSERT INTO {bot_username} VALUES (?, ?, ?, ?, ?, ?);", (user_id, username, reg_date, state, balance, invited_by, ))
+        referal_balance = 0
+        cursor.execute(f"INSERT INTO {bot_username} VALUES (?, ?, ?, ?, ?, ?, ?);", (user_id, username, reg_date, state, balance, invited_by, referal_balance, ))
         self.connection.commit()
         
     def check_if_user_exists_in_user_bot(self, bot_username, user_id):
@@ -710,6 +866,17 @@ class DB():
         cursor.execute(f"UPDATE {bot_username} SET balance = ? WHERE user_id = ?", (balance, user_id, ))
         self.connection.commit()
         
+    def get_referal_balance_from_user_bot(self, bot_username, user_id):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT referal_balance FROM {bot_username} WHERE user_id = ?;", (user_id,))
+        data = round(cursor.fetchone()[0], 2)
+        return data
+
+    def update_referal_balance_from_user_bot(self, bot_username, user_id, balance):
+        cursor = self.connection.cursor()
+        cursor.execute(f"UPDATE {bot_username} SET referal_balance = ? WHERE user_id = ?", (balance, user_id, ))
+        self.connection.commit()
+        
     def get_invited_by_from_user_bot(self, bot_username, user_id):
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT invited_by FROM {bot_username} WHERE user_id = ?;", (user_id,))
@@ -721,6 +888,16 @@ class DB():
         cursor.execute(f"SELECT invited_by FROM {bot_username} WHERE invited_by = ?;", (user_id, ))
         data = len(cursor.fetchall())
         return data
+
+    def get_all_users_in_user_bots(self):
+        user_bots = self.get_all_users_bots()
+        users = 0
+        for user_bot in user_bots:
+            bot_username = user_bot[0]
+            cursor = self.connection.cursor()
+            users += len(cursor.execute(f'''SELECT user_id FROM {bot_username};''').fetchall())
+
+        return users
 
 
 
@@ -742,5 +919,38 @@ class DB():
         cursor = self.connection.cursor()
         cursor.execute("SELECT label FROM yoomoney_labels;")
         data = cursor.fetchall()
+        
+        return data
+    
+    
+
+# unverified material table
+
+    def create_unverified_material_table(self):
+        cursor = self.connection.cursor()
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS unverified_material_table (id TEXT, material TEXT, user_id BIGINT, bot_username TEXT, material_type TEXT);''')
+        self.connection.commit()
+
+    def add_unverified_material(self, id, material, user_id, bot_username, material_type):
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO unverified_material_table VALUES (?, ?, ?, ?, ?)", (id, material, user_id, bot_username, material_type, ))
+        self.connection.commit()
+        
+    def delete_unverified_material(self, id):
+        cursor = self.connection.cursor()
+        cursor.execute("DELETE FROM unverified_material_table WHERE id = ?;", (id, ))
+        self.connection.commit()
+        
+    def get_all_unverified_material(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT id FROM unverified_material_table;")
+        data = cursor.fetchall()
+        
+        return data
+    
+    def get_unverified_material_info(self, id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT material, user_id, bot_username, material_type FROM unverified_material_table WHERE id = ?;", (id, ))
+        data = cursor.fetchone()
         
         return data

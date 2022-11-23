@@ -14,7 +14,12 @@ async def message_handler(message: types.Message, chat_id):
     withdrawal_amount = message.text.replace(',', '.')
     try:
         if float(withdrawal_amount) > 20 and float(withdrawal_amount) <= db.get_balance(chat_id):
-            new_withdrawal_amount = float(withdrawal_amount) - (float(withdrawal_amount) * (float(db.get_commission_percentage())/100))
+            if db.get_subscription_time(chat_id) > 0:
+                commission_percentage = 3
+            else:  
+                commission_percentage = db.get_commission_percentage()
+                
+            new_withdrawal_amount = float(withdrawal_amount) - (float(withdrawal_amount) * (float(commission_percentage)/100))
             data = db.get_storage(chat_id)
             wallet_type = data["wallet_type"]
             card_number = data["card_number"]
@@ -24,7 +29,7 @@ async def message_handler(message: types.Message, chat_id):
             
             await bot.send_message(
                 chat_id=chat_id, 
-                text=f"<b>✅ Вывод успешно зарегистрирован\n\n💸 Вам придут {round(new_withdrawal_amount, 2)} ₽. Комиссия {round(float(withdrawal_amount) * (float(db.get_commission_percentage())/100), 2)} ₽.</b>",
+                text=f"<b>✅ Вывод успешно зарегистрирован\n\n💸 Вам придут {round(new_withdrawal_amount, 2)} ₽. Комиссия {round(float(withdrawal_amount) * (float(commission_percentage)/100), 2)} ₽.</b>",
                 parse_mode=ParseMode.HTML
             )
             
@@ -38,7 +43,7 @@ async def message_handler(message: types.Message, chat_id):
             invited_by_id = db.get_invited_by(chat_id)
             if not invited_by_id is None:
                 old_balance = db.get_balance(invited_by_id)
-                referal_bonus = float(withdrawal_amount) * (float(db.get_commission_percentage())/100) * float(db.get_referal_bonus() / 100)
+                referal_bonus = float(withdrawal_amount) * (float(commission_percentage)/100) * float(db.get_referal_bonus() / 100)
                 new_balance = old_balance + referal_bonus
                 db.update_balance(invited_by_id, new_balance)
                 

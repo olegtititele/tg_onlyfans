@@ -31,10 +31,9 @@ async def userbot_settings_callback(call, chat_id, message_id):
         photo = images[cf.current_material][0]
         media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
         
-        data = json.loads(db.get_storage(chat_id))
+        data = db.get_storage(chat_id)
         
-        data["photo"] = "dededede"
-        print(data)
+        data["photo"] = photo
         db.update_storage(chat_id, data)
         
         await bot.edit_message_media(

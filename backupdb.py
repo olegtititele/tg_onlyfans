@@ -13,7 +13,7 @@ class DB():
 
     def __init__(self):
         self.connection = sqlite3.connect("database.db")
-        self.my_connection = mysql.connector.connect(user='fans_buy', password='AdminNeSoset13.', host='185.209.29.250', database='fans_buy_database')
+        self.my_connection = mysql.connector.connect(user='fans_buy', password='AdminNeSoset3.', host='localhost', database='fans_buy_database')
     
     def create_users_table(self):
         cursor = self.my_connection.cursor()

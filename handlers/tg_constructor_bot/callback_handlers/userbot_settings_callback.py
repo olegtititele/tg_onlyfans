@@ -33,8 +33,8 @@ async def userbot_settings_callback(call, chat_id, message_id):
         
         data = db.get_storage(chat_id)
         print(data)
-#         data["photo"] = photo
-#         db.update_storage(chat_id, data)
+        data["photo"] = photo
+        db.update_storage(chat_id, data)
         
         await bot.edit_message_media(
             chat_id=chat_id,

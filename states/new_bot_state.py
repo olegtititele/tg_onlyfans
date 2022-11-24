@@ -50,7 +50,8 @@ async def message_handler(message: types.Message, chat_id):
                 parse_mode=ParseMode.HTML,
                 reply_markup=kb.back_to_user_bots_list_kb()
             )
-    except:
+    except Exception as e:
+        print(e)
         await bot.send_photo(
             chat_id=chat_id, 
             caption=f"<b>Введите корректный токен бота!</b>",

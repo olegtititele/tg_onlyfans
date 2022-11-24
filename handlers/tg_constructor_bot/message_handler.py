@@ -209,8 +209,10 @@ async def message_handler(message: types.Message):
     
     elif current_state == states.change_ref_in_user_bot:
         await change_ref_in_user_bot_state.message_handler(message, chat_id)
+        
     elif current_state == states.start_referal_sum:
         await start_referal_sum_state.message_handler(message, chat_id)
+        
     else:
         return
   

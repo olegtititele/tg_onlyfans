@@ -230,7 +230,7 @@ class Keyboards():
   
 		return kb, pages
 
-	def delete_img_kb(self, id):
+	def delete_photo_kb(self, id):
 		decline_btn = InlineKeyboardButton('⛔️ Удалить', callback_data=f'del_img-{id}')
 		kb = InlineKeyboardMarkup()
 		kb.row(decline_btn)

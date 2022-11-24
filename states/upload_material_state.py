@@ -17,12 +17,14 @@ async def message_handler(message: types.Message, chat_id):
     try:
         if message.content_type == "photo":
             file_id = message.photo[-1].file_id
-            id = generate_random_id(db.get_all_photos_id())
+            filename = generate_random_id(db.get_all_filenames(message.content_type))
                 
-            photo_file = await bot.get_file(file_id)
-            photo_bytes = await bot.download_file(photo_file.file_path)
+            file = await bot.get_file(file_id)
+            file_bytes = (await bot.download_file(file.file_path)).read()
+            file_option = open(f'materials/photos/{filename}.jpg', 'wb')
+            file_option.write(file_bytes)
         
-            db.add_photo(photo_bytes.read(), current_bot, id)
+            db.add_material(filename, message.content_type, current_bot)
             
             await bot.send_message(
                 chat_id=chat_id, 
@@ -34,17 +36,20 @@ async def message_handler(message: types.Message, chat_id):
                 chat_id=cf.unverified_material_chat_id,
                 photo=file_id,
                 caption=f'<b>Пользователь:</b> @{db.get_username(chat_id)}\n<b>Бот:</b> @{current_bot}\n<b>Дата:</b> {datetime.now().strftime("%d.%m.%Y %H:%M:%S")}',
-                reply_markup=kb.delete_img_kb(id),
+                reply_markup=kb.delete_photo_kb(filename),
                 parse_mode=ParseMode.HTML
             )                        
             
         elif message.content_type == "video":
             file_id = message.video.file_id
-            id = generate_random_id(db.get_all_videos_id())
-            video_file = await bot.get_file(file_id)
-            video_bytes = await bot.download_file(video_file.file_path)
-            
-            db.add_video(video_bytes.read(), current_bot, id)
+            filename = generate_random_id(db.get_all_filenames(message.content_type))
+                
+            file = await bot.get_file(file_id)
+            file_bytes = (await bot.download_file(file.file_path)).read()
+            file_option = open(f'materials/videos/{filename}.mp4', 'wb')
+            file_option.write(file_bytes)
+        
+            db.add_material(filename, message.content_type, current_bot)
 
             await bot.send_message(
                 chat_id=chat_id, 
@@ -57,7 +62,7 @@ async def message_handler(message: types.Message, chat_id):
                 chat_id=cf.unverified_material_chat_id,
                 video=file_id,
                 caption=f'<b>Пользователь:</b> @{db.get_username(chat_id)}\n<b>Бот:</b> @{current_bot}\n<b>Дата:</b> {datetime.now().strftime("%d.%m.%Y %H:%M:%S")}',
-                reply_markup=kb.delete_video_kb(id),
+                reply_markup=kb.delete_video_kb(filename),
                 parse_mode=ParseMode.HTML
             )
         

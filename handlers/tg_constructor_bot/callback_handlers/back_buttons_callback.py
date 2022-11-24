@@ -30,9 +30,9 @@ async def back_buttons_callback(call, chat_id, message_id):
         
         current_bot = db.get_current_bot(chat_id)
         created_date = db.get_user_bot_created_time(current_bot)
-        images = len(db.get_user_bot_photos(current_bot))
+        images = len(db.get_bot_photos(current_bot))
         photo_price = db.get_user_bot_photo_price(current_bot)
-        videos = len(db.get_user_bot_videos(current_bot))
+        videos = len(db.get_bot_videos(current_bot))
         video_price = db.get_user_bot_video_price(current_bot)
         
         media = types.InputMediaPhoto(media=InputFile("background.jpg"))

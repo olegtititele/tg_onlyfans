@@ -185,7 +185,7 @@ async def check_message(token, message):
         
     elif message_text == "🖼 Фото":
         
-        bot_photos = db.get_user_bot_photos(bot_username)
+        bot_photos = db.get_bot_photos(bot_username)
         balance = db.get_balance_from_user_bot(bot_username, chat_id)
         referal_balance = db.get_referal_balance_from_user_bot(bot_username, chat_id)
         photo_price = db.get_user_bot_photo_price(bot_username)
@@ -211,7 +211,7 @@ async def check_message(token, message):
             else:
                 if referal_balance >= photo_price:
                     for photo in bot_photos:
-                        viewed_users = db.get_viewed_users_on_photo(bot_username, photo[0])
+                        viewed_users = db.get_viewed_users_on_photo(photo[0])
                         if str(chat_id) not in viewed_users:
                             
                             # Списать у пользователя
@@ -219,9 +219,9 @@ async def check_message(token, message):
                             db.update_referal_balance_from_user_bot(bot_username, chat_id, new_balance)
                             
                             viewed_users.append(str(chat_id))
-                            db.update_viewed_users_on_photo(bot_username, photo[0], viewed_users)
+                            db.update_viewed_users_on_photo(photo[0], viewed_users)
                             
-                            data = {'chat_id': str(chat_id), 'photo': photo[0]}
+                            data = {'chat_id': str(chat_id), 'photo': open(f'materials/photos/{photo[0]}.jpg', 'rb')}
                             
                             return await send_photo(token, data)
                 else:        
@@ -235,7 +235,7 @@ async def check_message(token, message):
                         
                     else:
                         for photo in bot_photos:
-                            viewed_users = db.get_viewed_users_on_photo(bot_username, photo[0])
+                            viewed_users = db.get_viewed_users_on_photo(photo[0])
                             if str(chat_id) not in viewed_users:
                                 
                                 # Списать у пользователя
@@ -253,9 +253,9 @@ async def check_message(token, message):
                                 
                                 
                                 viewed_users.append(str(chat_id))
-                                db.update_viewed_users_on_photo(bot_username, photo[0], viewed_users)
+                                db.update_viewed_users_on_photo(photo[0], viewed_users)
                                 
-                                data = {'chat_id': str(chat_id), 'photo': photo[0]}
+                                data = {'chat_id': str(chat_id), 'photo': open(f'materials/photos/{photo[0]}.jpg', 'rb')}
                                 
                                 return await send_photo(token, data)
                 
@@ -270,7 +270,7 @@ async def check_message(token, message):
     elif message_text == "🖼 Видео":
         db.update_state_from_user_bot(bot_username, chat_id, "main_state")
         
-        bot_videos = db.get_user_bot_videos(bot_username)
+        bot_videos = db.get_bot_videos(bot_username)
         balance = db.get_balance_from_user_bot(bot_username, chat_id)
         referal_balance = db.get_referal_balance_from_user_bot(bot_username, chat_id)
         video_price = db.get_user_bot_video_price(bot_username)
@@ -297,7 +297,7 @@ async def check_message(token, message):
             else:
                 if referal_balance >= video_price:
                     for video in bot_videos:
-                        viewed_users = db.get_viewed_users_on_video(bot_username, video[0])
+                        viewed_users = db.get_viewed_users_on_video(video[0])
                         if str(chat_id) not in viewed_users:
                             
                             # Списать у пользователя
@@ -305,9 +305,9 @@ async def check_message(token, message):
                             db.update_referal_balance_from_user_bot(bot_username, chat_id, new_balance)
                             
                             viewed_users.append(str(chat_id))
-                            db.update_viewed_users_on_video(bot_username, video[0], viewed_users)
+                            db.update_viewed_users_on_video(video[0], viewed_users)
                             
-                            data = {'chat_id': str(chat_id), 'video': video[0]}
+                            data = {'chat_id': str(chat_id), 'video':  open(f'materials/videos/{video[0]}.mp4', 'rb')}
                             
                             return await send_video(token, data)
                 else:
@@ -321,7 +321,7 @@ async def check_message(token, message):
                         
                     else:
                         for video in bot_videos:
-                            viewed_users = db.get_viewed_users_on_video(bot_username, video[0])
+                            viewed_users = db.get_viewed_users_on_video(video[0])
                             if str(chat_id) not in viewed_users:
                                 # Списать у пользователя
                                 new_balance = balance - video_price
@@ -337,9 +337,9 @@ async def check_message(token, message):
                                 
                                 
                                 viewed_users.append(str(chat_id))
-                                db.update_viewed_users_on_video(bot_username, video[0], viewed_users)
+                                db.update_viewed_users_on_video(video[0], viewed_users)
                                 
-                                data = {'chat_id': str(chat_id), 'video': video[0]}
+                                data = {'chat_id': str(chat_id), 'video': open(f'materials/videos/{video[0]}.mp4', 'rb')}
                                 
                                 return await send_video(token, data)
                 
@@ -614,7 +614,6 @@ async def run(token):
                     await check_updates(token, update)
                     
             
-            # print(update)
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)
         except:
             await asyncio.sleep(10)

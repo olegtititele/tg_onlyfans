@@ -1,7 +1,8 @@
-from io import BytesIO
+import os
 
 import config.config as cf
 from aiogram import types
+from aiogram.types import InputFile
 from config.states import States
 from create_bot import bot
 from db.db import DB
@@ -16,7 +17,7 @@ async def userbot_settings_callback(call, chat_id, message_id):
     
     if call.data == "show_all_images":
         current_bot = db.get_current_bot(chat_id)
-        images = db.get_user_bot_photos(current_bot)
+        images = db.get_bot_photos(current_bot)
         
         if len(images) < 1:
             return await bot.answer_callback_query(
@@ -27,11 +28,11 @@ async def userbot_settings_callback(call, chat_id, message_id):
             
         cf.current_material = 0
         
-        photo = db.get_photo(images[cf.current_material][0])
-        media = types.InputMediaPhoto(BytesIO(photo))
+        photo = images[cf.current_material][0]
+        media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
         
         data = db.get_storage(chat_id)
-        data["photo"] = images[cf.current_material][0]
+        data["photo"] = photo
         db.update_storage(chat_id, data)
         
         await bot.edit_message_media(
@@ -45,7 +46,7 @@ async def userbot_settings_callback(call, chat_id, message_id):
         
     if call.data == "show_all_videos":
         current_bot = db.get_current_bot(chat_id)
-        videos = db.get_user_bot_videos(current_bot)
+        videos = db.get_bot_videos(current_bot)
         
         if len(videos) < 1:
             return await bot.answer_callback_query(
@@ -55,11 +56,11 @@ async def userbot_settings_callback(call, chat_id, message_id):
             )
         
         cf.current_material = 0
-        video = db.get_video(videos[cf.current_material][0])
-        media = types.InputMediaVideo(BytesIO(video))
+        video = videos[cf.current_material][0]
+        media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
         
         data = db.get_storage(chat_id)
-        data["video"] = videos[cf.current_material][0]
+        data["video"] = video
         db.update_storage(chat_id, data)
         
         await bot.edit_message_media(
@@ -112,11 +113,13 @@ async def userbot_settings_callback(call, chat_id, message_id):
         
         db.delete_user_bot(current_bot)
         
-        for photo in db.get_user_bot_photos(current_bot):
+        for photo in db.get_bot_photos(current_bot):
             db.delete_photo(photo[0])
+            os.remove(f"materials/photos/{photo[0]}.jpg")
             
-        for video in db.get_user_bot_videos(current_bot):
+        for video in db.get_bot_videos(current_bot):
             db.delete_video(video[0])
+            os.remove(f"materials/videos/{video[0]}.mp4")
             
         await bot.answer_callback_query(
             callback_query_id=call.id,

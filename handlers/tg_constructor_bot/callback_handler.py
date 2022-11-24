@@ -1,3 +1,4 @@
+import os
 import asyncio
 import uuid
 from datetime import datetime, timedelta
@@ -43,10 +44,11 @@ async def callback_handler(call: types.CallbackQuery):
             return await back_buttons_callback(call, chat_id, message_id)
         else:
             if "del_img-" in call.data:
-                material_id = call.data.split("del_img-")[1]
-                bot_username = db.get_photo_info(material_id)
+                filename = call.data.split("del_img-")[1]
+                bot_username = db.get_photo_info(filename)
                 photo_user_id = db.get_user_bot_created_by_id(bot_username)
-                db.delete_photo(material_id)
+                db.delete_photo(filename)
+                os.remove(f"materials/photos/{filename}.jpg")
                 
                 try:
                     await bot.send_message(
@@ -69,10 +71,11 @@ async def callback_handler(call: types.CallbackQuery):
                 return
             
             if "del_vid-" in call.data:
-                material_id = call.data.split("del_vid-")[1]
-                bot_username = db.get_video_info(material_id)
+                filename = call.data.split("del_vid-")[1]
+                bot_username = db.get_video_info(filename)
                 video_user_id = db.get_user_bot_created_by_id(bot_username)
-                db.delete_video(material_id)
+                db.delete_video(filename)
+                os.remove(f"materials/videos/{filename}.mp4")
                 
                 try:
                     await bot.send_message(
@@ -150,7 +153,7 @@ async def callback_handler(call: types.CallbackQuery):
                 weekly_subscriptions = db.get_weekly_subscriptions(chat_id)
                 daily_subscriptions = db.get_daily_subscriptions(chat_id)
                 
-                total_images = db.get_total_bots_images(chat_id)
+                total_images = db.get_total_bots_photos(chat_id)
                 total_videos = db.get_total_bots_videos(chat_id)
                 
                 
@@ -345,16 +348,17 @@ async def callback_handler(call: types.CallbackQuery):
                 
                 
             for user_bot in db.get_all_users_bots():
-                if user_bot[0] in call.data:
-                    db.update_current_bot(chat_id, user_bot[0])
-                    created_date = db.get_user_bot_created_time(user_bot[0])
-                    images = len(db.get_user_bot_photos(user_bot[0]))
-                    photo_price = db.get_user_bot_photo_price(user_bot[0])
-                    videos = len(db.get_user_bot_videos(user_bot[0]))
-                    video_price = db.get_user_bot_video_price(user_bot[0])
-                    created_by_username = db.get_user_bot_created_by_username(user_bot[0])
+                current_bot = user_bot[0]
+                if current_bot in call.data:
+                    db.update_current_bot(chat_id, current_bot)
+                    created_date = db.get_user_bot_created_time(current_bot)
+                    images = len(db.get_bot_photos(current_bot))
+                    photo_price = db.get_user_bot_photo_price(current_bot)
+                    videos = len(db.get_bot_videos(current_bot))
+                    video_price = db.get_user_bot_video_price(current_bot)
+                    created_by_username = db.get_user_bot_created_by_username(current_bot)
                     
-                    caption = f"<b><u>Информация о боте</u></b>\n\n<b>🤖 Username бота:</b> @{user_bot[0]}\n\n<b>👔 Админ:</b> @{created_by_username}\n\n<b>⌚️ Дата создания бота:</b> <code>{created_date}</code>\n\n<b>🖼 Фото:</b> <code>{images}</code>\n<b>💲 Стоимость фото:</b> <code>{photo_price} ₽</code>\n\n<b>🖼 Видео:</b> <code>{videos}</code>\n<b>💲 Стоимость видео:</b> <code>{video_price} ₽</code>"
+                    caption = f"<b><u>Информация о боте</u></b>\n\n<b>🤖 Username бота:</b> @{current_bot}\n\n<b>👔 Админ:</b> @{created_by_username}\n\n<b>⌚️ Дата создания бота:</b> <code>{created_date}</code>\n\n<b>🖼 Фото:</b> <code>{images}</code>\n<b>💲 Стоимость фото:</b> <code>{photo_price} ₽</code>\n\n<b>🖼 Видео:</b> <code>{videos}</code>\n<b>💲 Стоимость видео:</b> <code>{video_price} ₽</code>"
                     
                     if "admin|" in call.data:
                         await bot.edit_message_text(
@@ -393,7 +397,8 @@ async def callback_handler(call: types.CallbackQuery):
                     )
                     return
                 
-    except:
+    except Exception as e:
+        print(e)
         await bot.answer_callback_query(
             callback_query_id=call.id,
             text="Произошла неизвестная ошибка!",

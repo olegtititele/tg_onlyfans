@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 class DB():
 
     def __init__(self):
-        self.connection = mysql.connector.connect(user='fans_buy', password='AdminNeSoset13.', host='185.209.29.250', database='fans_buy_database')
+        self.connection = mysql.connector.connect(user='fans_buy', password='AdminNeSoset3.', host='localhost', database='fans_buy_database')
 
 
     # # user

@@ -1,8 +1,9 @@
-import os
 import asyncio
+import os
 import uuid
 from datetime import datetime, timedelta
 
+from config.bot_texts import *
 from aiogram import Dispatcher, types
 from config.states import States
 from create_bot import bot
@@ -351,20 +352,13 @@ async def callback_handler(call: types.CallbackQuery):
                 current_bot = user_bot[0]
                 if current_bot in call.data:
                     db.update_current_bot(chat_id, current_bot)
-                    created_date = db.get_user_bot_created_time(current_bot)
-                    images = len(db.get_bot_photos(current_bot))
-                    photo_price = db.get_user_bot_photo_price(current_bot)
-                    videos = len(db.get_bot_videos(current_bot))
-                    video_price = db.get_user_bot_video_price(current_bot)
-                    created_by_username = db.get_user_bot_created_by_username(current_bot)
                     
-                    caption = f"<b><u>Информация о боте</u></b>\n\n<b>🤖 Username бота:</b> @{current_bot}\n\n<b>👔 Админ:</b> @{created_by_username}\n\n<b>⌚️ Дата создания бота:</b> <code>{created_date}</code>\n\n<b>🖼 Фото:</b> <code>{images}</code>\n<b>💲 Стоимость фото:</b> <code>{photo_price} ₽</code>\n\n<b>🖼 Видео:</b> <code>{videos}</code>\n<b>💲 Стоимость видео:</b> <code>{video_price} ₽</code>"
                     
                     if "admin|" in call.data:
                         await bot.edit_message_text(
                             chat_id=chat_id,
                             message_id=message_id,
-                            text=caption,
+                            text=bot_info_text(current_bot),
                             parse_mode=ParseMode.HTML,
                             reply_markup=kb.back_to_all_bots_list_kb()
                         )
@@ -372,9 +366,9 @@ async def callback_handler(call: types.CallbackQuery):
                         await bot.edit_message_caption(
                             chat_id=chat_id,
                             message_id=message_id,
-                            caption=caption,
+                            caption=bot_info_text(current_bot),
                             parse_mode=ParseMode.HTML,
-                            reply_markup=kb.bot_info_kb()
+                            reply_markup=kb.bot_info_kb(chat_id)
                         )
                     return
                         
@@ -397,8 +391,7 @@ async def callback_handler(call: types.CallbackQuery):
                     )
                     return
                 
-    except Exception as e:
-        print(e)
+    except:
         await bot.answer_callback_query(
             callback_query_id=call.id,
             text="Произошла неизвестная ошибка!",

@@ -1,5 +1,5 @@
 import os
-import json
+
 import config.config as cf
 from aiogram import types
 from aiogram.types import InputFile
@@ -32,7 +32,6 @@ async def userbot_settings_callback(call, chat_id, message_id):
         media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
         
         data = db.get_storage(chat_id)
-        
         data["photo"] = photo
         db.update_storage(chat_id, data)
         
@@ -72,6 +71,39 @@ async def userbot_settings_callback(call, chat_id, message_id):
         )
         
         return
+    
+    if call.data == "user_alert":
+        db.update_state(chat_id, states.user_bot_alert)
+
+        return await bot.edit_message_caption(
+            chat_id=chat_id,
+            message_id=message_id,
+            caption="<b>Отправьте текст/фото с текстом для рассылки:</b>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb.back_to_user_bot_info_kb()
+        )
+    
+    if call.data == "invite_referal_amount":
+        db.update_state(chat_id, states.invite_referal_amount)
+
+        return await bot.edit_message_caption(
+            chat_id=chat_id,
+            message_id=message_id,
+            caption="<b>⤵️ Введите сумму реферала, которую будет получать пользователь за приглашенного человека:</b>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb.back_to_user_bot_info_kb()
+        )
+    
+    if call.data == "start_balance_amount":
+        db.update_state(chat_id, states.start_balance_amount)
+
+        return await bot.edit_message_caption(
+            chat_id=chat_id,
+            message_id=message_id,
+            caption="<b>⤵️ Введите сумму стартового баланса пользователя:</b>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb.back_to_user_bot_info_kb()
+        )
     
     if call.data == "edit_photo_price":
         db.update_state(chat_id, states.photo_price_state)

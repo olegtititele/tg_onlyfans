@@ -7,7 +7,7 @@ import aioschedule
 from aiogram import executor
 from telegram import ParseMode
 
-import handlers.tg_user_bot.userbot_handler as us_bot
+import handlers.tg_user_bot.userbot as userbot
 from create_bot import bot, dp
 from db.db import DB
 from handlers.tg_constructor_bot import callback_handler, commands, message_handler
@@ -25,6 +25,7 @@ callback_handler.register_handlers_client(dp)
 async def bot_on_start():
     db = DB()
     
+    # db.add_column()
     db.create_yoomoney_labels_table()
     db.create_bot_information_table()
     db.create_withdrawal_requests_table()
@@ -39,7 +40,7 @@ async def bot_on_start():
     for bot in db.get_all_users_bots():
         token = bot[1]
         try:
-            asyncio.create_task(us_bot.run(token))
+            asyncio.create_task(userbot.run(token))
         except:
             pass
     

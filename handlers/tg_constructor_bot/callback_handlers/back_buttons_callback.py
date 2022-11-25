@@ -1,6 +1,7 @@
 import config.config as cf
 from aiogram import types
 from aiogram.types import InputFile
+from config.bot_texts import *
 from config.states import States
 from create_bot import bot
 from db.db import DB
@@ -29,12 +30,7 @@ async def back_buttons_callback(call, chat_id, message_id):
         db.update_state(chat_id, states.main_state)
         
         current_bot = db.get_current_bot(chat_id)
-        created_date = db.get_user_bot_created_time(current_bot)
-        images = len(db.get_bot_photos(current_bot))
-        photo_price = db.get_user_bot_photo_price(current_bot)
-        videos = len(db.get_bot_videos(current_bot))
-        video_price = db.get_user_bot_video_price(current_bot)
-        
+
         media = types.InputMediaPhoto(media=InputFile("background.jpg"))
             
         await bot.edit_message_media(
@@ -46,9 +42,9 @@ async def back_buttons_callback(call, chat_id, message_id):
         return await bot.edit_message_caption(
             chat_id=chat_id,
             message_id=message_id,
-            caption=f"<b><u>Информация о боте</u></b>\n\n<b>🤖 Username:</b> @{current_bot}\n\n<b>⌚️ Дата создания бота:</b> <code>{created_date}</code>\n\n<b>🖼 Фото:</b> <code>{images}</code>\n<b>💲 Стоимость фото:</b> <code>{photo_price} ₽</code>\n\n<b>🖼 Видео:</b> <code>{videos}</code>\n<b>💲 Стоимость видео:</b> <code>{video_price} ₽</code>",
+            caption=bot_info_text(current_bot),
             parse_mode=ParseMode.HTML,
-            reply_markup=kb.bot_info_kb()
+            reply_markup=kb.bot_info_kb(chat_id)
         )
         
     if call.data == "back_to_profile":

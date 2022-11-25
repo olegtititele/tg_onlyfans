@@ -68,8 +68,6 @@ class Keyboards():
 		show_bots_list_btn = KeyboardButton('📃 Посмотреть список ботов')
 		change_proc_btn = KeyboardButton('💯 Комиссия')
 		change_ref_btn = KeyboardButton('💯 Реферал')
-		change_ref_in_user_bot_btn = KeyboardButton('💯 Реферал в боте пользователя')
-		start_referal_btn = KeyboardButton('💯 Реферал при старте')
 		withdrawal_requests_btn = KeyboardButton('🏦 Заявки на вывод')
 		popup_balance_btn = KeyboardButton('💰 Зачислить баланс')
 		alert_btn = KeyboardButton('✉️ Рассылка')
@@ -80,8 +78,6 @@ class Keyboards():
   
 		kb.add(show_bots_list_btn)
 		kb.add(change_proc_btn, change_ref_btn)
-		kb.add(change_ref_in_user_bot_btn)
-		kb.add(start_referal_btn)
 		kb.add(alert_btn, popup_balance_btn)
 		kb.add(withdrawal_requests_btn)
 
@@ -163,9 +159,14 @@ class Keyboards():
   
 		return kb, pages
 
-	def bot_info_kb(self):
-		show_all_images_btn = InlineKeyboardButton('📷 Посмотреть все изображения', callback_data=f'show_all_images')
-		show_all_videos_btn = InlineKeyboardButton('🎥 Посмотреть все видео', callback_data=f'show_all_videos')
+	def bot_info_kb(self, chat_id):
+		db = DB()
+		alert_btn = InlineKeyboardButton('📮 Рассылка сообщений', callback_data=f'user_alert')
+		channel_subscription_btn = InlineKeyboardButton('🌟 Канал для обязательной подписки', callback_data=f'channel_subscription')
+		invite_referal_btn = InlineKeyboardButton('💴 Реферал за пользователя', callback_data=f'invite_referal_amount')
+		start_balance_btn = InlineKeyboardButton('💵 Стартовый баланс', callback_data=f'start_balance_amount')
+		show_all_images_btn = InlineKeyboardButton('📷 Фото', callback_data=f'show_all_images')
+		show_all_videos_btn = InlineKeyboardButton('🎥 Видео', callback_data=f'show_all_videos')
 		edit_photo_price_btn = InlineKeyboardButton('💶 Изменить стоимость фото', callback_data=f'edit_photo_price')
 		edit_video_price_btn = InlineKeyboardButton('💷 Изменить стоимость видео', callback_data=f'edit_video_price')
 		upload_material_btn = InlineKeyboardButton('🖼 Загрузить материал', callback_data=f'upload_material')
@@ -173,8 +174,12 @@ class Keyboards():
 		back_btn = InlineKeyboardButton('🔙 Назад', callback_data='back_to_user_bots_list')
   
 		kb = InlineKeyboardMarkup()
-		kb.add(show_all_images_btn)
-		kb.add(show_all_videos_btn)
+		# if db.get_subscription_time(chat_id) > 0:
+		kb.add(show_all_images_btn, show_all_videos_btn)
+		kb.add(alert_btn)
+		kb.add(channel_subscription_btn)
+		kb.add(invite_referal_btn)
+		kb.add(start_balance_btn)
 		kb.add(edit_photo_price_btn)
 		kb.add(edit_video_price_btn)
 		kb.add(upload_material_btn)

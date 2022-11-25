@@ -21,7 +21,7 @@ from .callback_handlers.scroll_buttons_callback import scroll_buttons_callback
 from .callback_handlers.userbot_settings_callback import \
     userbot_settings_callback
 from .callback_handlers.video_callback import video_callback
-
+import traceback
 
 async def callback_handler(call: types.CallbackQuery):
     db = DB()
@@ -391,7 +391,8 @@ async def callback_handler(call: types.CallbackQuery):
                     )
                     return
                 
-    except:
+    except Exception as e:
+        print('Ошибка:\n', traceback.format_exc())
         await bot.answer_callback_query(
             callback_query_id=call.id,
             text="Произошла неизвестная ошибка!",

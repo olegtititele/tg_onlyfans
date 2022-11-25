@@ -162,7 +162,6 @@ class Keyboards():
 	def bot_info_kb(self, chat_id):
 		db = DB()
 		alert_btn = InlineKeyboardButton('📮 Рассылка сообщений', callback_data=f'user_alert')
-		channel_subscription_btn = InlineKeyboardButton('🌟 Канал для обязательной подписки', callback_data=f'channel_subscription')
 		invite_referal_btn = InlineKeyboardButton('💴 Реферал за пользователя', callback_data=f'invite_referal_amount')
 		start_balance_btn = InlineKeyboardButton('💵 Стартовый баланс', callback_data=f'start_balance_amount')
 		show_all_images_btn = InlineKeyboardButton('📷 Фото', callback_data=f'show_all_images')
@@ -177,7 +176,6 @@ class Keyboards():
 		# if db.get_subscription_time(chat_id) > 0:
 		kb.add(show_all_images_btn, show_all_videos_btn)
 		kb.add(alert_btn)
-		kb.add(channel_subscription_btn)
 		kb.add(invite_referal_btn)
 		kb.add(start_balance_btn)
 		kb.add(edit_photo_price_btn)

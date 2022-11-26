@@ -58,7 +58,7 @@ async def message_handler(message: types.Message):
         return await bot.send_photo(
             chat_id=chat_id, 
             photo=photo,
-            caption=f"<b><u>Возможности с Премиум подпиской</u></b>\n\n<b>• Комиссия:</b> <s>13%</s> <b>3%</b>\n\n<b>• Нет упоминания сервиса в вашем боте</b>",
+            caption=f"<b><u>Возможности с Премиум подпиской</u></b>\n\n<b>• Комиссия:</b> <s>13%</s> <b>3%</b>\n\n<b>• Нет упоминания сервиса в вашем боте</b>\n\n<b>• Обьязательная подписка пользователя на ваш канал</b>",
             parse_mode=ParseMode.HTML,
             reply_markup=kb.premium_price_kb()
         )

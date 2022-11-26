@@ -6,19 +6,19 @@ from dateutil.parser import parse
 class DB():
 
     def __init__(self):
-        self.connection = mysql.connector.connect(user='fans_buy', password='AdminNeSoset3.', host='localhost', database='fans_buy_database')
+        self.connection = mysql.connector.connect(user='sqliter_user', password='Admin2709!', host='localhost', database='fans_buy_database')
 
     
     def add_column(self):
         cursor = self.connection.cursor()
-        cursor.execute("ALTER TABLE users_bots ADD invited_ref_sum REAL default '20';")
+        cursor.execute("ALTER TABLE users ADD current_material TEXT;")
         self.connection.commit()
 
     # # user
 
     def create_users_table(self):
         cursor = self.connection.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS users (user_id BIGINT PRIMARY KEY, username TEXT, state TEXT, status TEXT, balance REAL, current_bot TEXT, invited_by TEXT, storage TEXT, invited_time TIMESTAMP, subscription_time TIMESTAMP);''')
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS users (user_id BIGINT PRIMARY KEY, username TEXT, state TEXT, status TEXT, balance REAL, current_bot TEXT, invited_by TEXT, storage TEXT, invited_time TIMESTAMP, subscription_time TIMESTAMP, current_material TEXT);''')
         self.connection.commit()
         
 
@@ -29,7 +29,8 @@ class DB():
         balance = 0
         current_bot = None
         storage = {}
-        cursor.execute("INSERT INTO users VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, username, state, status, balance, current_bot, invited_by, json.dumps(storage), datetime.now(), datetime.now(), ))
+        current_material = None
+        cursor.execute("INSERT INTO users VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, username, state, status, balance, current_bot, invited_by, json.dumps(storage), datetime.now(), datetime.now(), current_material, ))
         self.connection.commit()
         
     def check_if_user_exists(self, user_id):
@@ -87,6 +88,17 @@ class DB():
     def update_storage(self, user_id, storage):
         cursor = self.connection.cursor()
         cursor.execute("UPDATE users SET storage = %s WHERE user_id = '%s';", (json.dumps(storage), user_id,))
+        self.connection.commit()
+        
+    def get_current_material(self, user_id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT current_material FROM users WHERE user_id = '%s';", (user_id,))
+        data = cursor.fetchone()[0]
+        return data
+
+    def update_current_material(self, user_id, current_material):
+        cursor = self.connection.cursor()
+        cursor.execute("UPDATE users SET current_material = %s WHERE user_id = '%s'", (current_material, user_id,))
         self.connection.commit()
         
     def get_balance(self, user_id):

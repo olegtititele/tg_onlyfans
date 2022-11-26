@@ -25,9 +25,7 @@ async def video_callback(call, chat_id, message_id):
             video = videos[cf.current_material][0]
             media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
             
-            data = db.get_storage(chat_id)
-            data["video"] = video
-            db.update_storage(chat_id, data)
+            db.update_current_material(chat_id, video)
             
             await bot.edit_message_media(
                 chat_id=chat_id,
@@ -48,9 +46,8 @@ async def video_callback(call, chat_id, message_id):
             video = videos[cf.current_material][0]
             media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
             
-            data = db.get_storage(chat_id)
-            data["video"] = video
-            db.update_storage(chat_id, data)
+            
+            db.update_current_material(chat_id, video)
             
             await bot.edit_message_media(
                 chat_id=chat_id,
@@ -63,8 +60,7 @@ async def video_callback(call, chat_id, message_id):
             
     if call.data == "delete_video":
         current_bot = db.get_current_bot(chat_id)
-        data = db.get_storage(chat_id)
-        filename = data["video"]
+        filename = db.get_current_material(chat_id)
         db.delete_video(filename)
         os.remove(f"materials/videos/{filename}.mp4")
         
@@ -77,9 +73,7 @@ async def video_callback(call, chat_id, message_id):
                 video = videos[cf.current_material][0]
                 media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
                 
-                data = db.get_storage(chat_id)
-                data["video"] = video
-                db.update_storage(chat_id, data)
+                db.update_current_material(chat_id, video)
                 
                 await bot.edit_message_media(
                     chat_id=chat_id,
@@ -93,9 +87,7 @@ async def video_callback(call, chat_id, message_id):
                 video = videos[cf.current_material][0]
                 media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
                 
-                data = db.get_storage(chat_id)
-                data["video"] = video
-                db.update_storage(chat_id, data)
+                db.update_current_material(chat_id, video)
                 
                 await bot.edit_message_media(
                     chat_id=chat_id,

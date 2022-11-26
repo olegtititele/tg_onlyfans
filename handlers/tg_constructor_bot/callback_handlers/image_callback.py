@@ -24,9 +24,7 @@ async def image_callback(call, chat_id, message_id):
             photo = images[cf.current_material][0]
             media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
             
-            data = db.get_storage(chat_id)
-            data["photo"] = photo
-            db.update_storage(chat_id, data)
+            db.update_current_material(chat_id, photo)
             
             await bot.edit_message_media(
                 chat_id=chat_id,
@@ -47,10 +45,7 @@ async def image_callback(call, chat_id, message_id):
             photo = images[cf.current_material][0]
             media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
             
-            
-            data = db.get_storage(chat_id)
-            data["photo"] = photo
-            db.update_storage(chat_id, data)
+            db.update_current_material(chat_id, photo)
             
             await bot.edit_message_media(
                 chat_id=chat_id,
@@ -63,8 +58,7 @@ async def image_callback(call, chat_id, message_id):
             
     if call.data == "delete_image":
         current_bot = db.get_current_bot(chat_id)
-        data = db.get_storage(chat_id)
-        filename = data["photo"]
+        filename = db.get_current_material(chat_id)
         db.delete_photo(filename)
         os.remove(f"materials/photos/{filename}.jpg")
         
@@ -78,9 +72,7 @@ async def image_callback(call, chat_id, message_id):
                 media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
                 
                 
-                data = db.get_storage(chat_id)
-                data["photo"] = photo
-                db.update_storage(chat_id, data)
+                db.update_current_material(chat_id, photo)
                 
                 await bot.edit_message_media(
                     chat_id=chat_id,
@@ -95,9 +87,7 @@ async def image_callback(call, chat_id, message_id):
                 media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
                 
                 
-                data = db.get_storage(chat_id)
-                data["photo"] = photo
-                db.update_storage(chat_id, data)
+                db.update_current_material(chat_id, photo)
                 
                 await bot.edit_message_media(
                     chat_id=chat_id,

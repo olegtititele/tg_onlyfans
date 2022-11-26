@@ -21,7 +21,7 @@ from .callback_handlers.scroll_buttons_callback import scroll_buttons_callback
 from .callback_handlers.userbot_settings_callback import \
     userbot_settings_callback
 from .callback_handlers.video_callback import video_callback
-import traceback
+
 
 async def callback_handler(call: types.CallbackQuery):
     db = DB()
@@ -45,56 +45,82 @@ async def callback_handler(call: types.CallbackQuery):
             return await back_buttons_callback(call, chat_id, message_id)
         else:
             if "del_img-" in call.data:
-                filename = call.data.split("del_img-")[1]
-                bot_username = db.get_photo_info(filename)
-                photo_user_id = db.get_user_bot_created_by_id(bot_username)
-                db.delete_photo(filename)
-                os.remove(f"materials/photos/{filename}.jpg")
-                
                 try:
-                    await bot.send_message(
-                        chat_id=photo_user_id, 
-                        text=f"<b>❌ Фото удалено. Нарушает правила проекта.</b>",
-                        parse_mode=ParseMode.HTML
+                    filename = call.data.split("del_img-")[1]
+                    bot_username = db.get_photo_info(filename)
+                    photo_user_id = db.get_user_bot_created_by_id(bot_username)
+                    db.delete_photo(filename)
+                    os.remove(f"materials/photos/{filename}.jpg")
+                    
+                    try:
+                        await bot.send_message(
+                            chat_id=photo_user_id, 
+                            text=f"<b>❌ Фото удалено. Нарушает правила проекта.</b>",
+                            parse_mode=ParseMode.HTML
+                        )
+                    except:
+                        pass
+                    
+                    
+                    try:
+                        await bot.delete_message(
+                            chat_id=call.message.chat.id,
+                            message_id=call.message.message_id
+                        )
+                    except:
+                        pass
+                    
+                except TypeError:
+                    await bot.answer_callback_query(
+                        callback_query_id=call.id,
+                        text="Фото уже было удалено.",
+                        show_alert=True
                     )
-                except:
-                    pass
-                
-                
-                try:
+                    
                     await bot.delete_message(
                         chat_id=call.message.chat.id,
                         message_id=call.message.message_id
                     )
-                except:
-                    pass
                 
                 return
             
             if "del_vid-" in call.data:
-                filename = call.data.split("del_vid-")[1]
-                bot_username = db.get_video_info(filename)
-                video_user_id = db.get_user_bot_created_by_id(bot_username)
-                db.delete_video(filename)
-                os.remove(f"materials/videos/{filename}.mp4")
-                
                 try:
-                    await bot.send_message(
-                        chat_id=video_user_id, 
-                        text=f"<b>❌ Видео удалено. Нарушает правила проекта.</b>",
-                        parse_mode=ParseMode.HTML
+                    filename = call.data.split("del_vid-")[1]
+                    bot_username = db.get_video_info(filename)
+                    video_user_id = db.get_user_bot_created_by_id(bot_username)
+                    db.delete_video(filename)
+                    os.remove(f"materials/videos/{filename}.mp4")
+                    
+                    try:
+                        await bot.send_message(
+                            chat_id=video_user_id, 
+                            text=f"<b>❌ Видео удалено. Нарушает правила проекта.</b>",
+                            parse_mode=ParseMode.HTML
+                        )
+                    except:
+                        pass
+                    
+                    
+                    try:
+                        await bot.delete_message(
+                            chat_id=call.message.chat.id,
+                            message_id=call.message.message_id
+                        )
+                    except:
+                        pass
+                    
+                except TypeError:
+                    await bot.answer_callback_query(
+                        callback_query_id=call.id,
+                        text="Видео уже было удалено.",
+                        show_alert=True
                     )
-                except:
-                    pass
-                
-                
-                try:
+                    
                     await bot.delete_message(
                         chat_id=call.message.chat.id,
                         message_id=call.message.message_id
                     )
-                except:
-                    pass
                 
                 return
                 
@@ -392,6 +418,7 @@ async def callback_handler(call: types.CallbackQuery):
                     return
                 
     except Exception as e:
+        import traceback
         print('Ошибка:\n', traceback.format_exc())
         await bot.answer_callback_query(
             callback_query_id=call.id,

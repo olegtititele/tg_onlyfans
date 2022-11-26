@@ -1,5 +1,5 @@
 import os
-import json
+
 import config.config as cf
 from aiogram import types
 from aiogram.types import InputFile
@@ -31,10 +31,8 @@ async def userbot_settings_callback(call, chat_id, message_id):
         photo = images[cf.current_material][0]
         media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
         
-        data = db.get_storage(chat_id)
-        print(data)
-        data["photo"] = photo
-        db.update_storage(chat_id, data)
+        
+        db.update_current_material(chat_id, photo)
         
         await bot.edit_message_media(
             chat_id=chat_id,
@@ -60,9 +58,8 @@ async def userbot_settings_callback(call, chat_id, message_id):
         video = videos[cf.current_material][0]
         media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
         
-        data = db.get_storage(chat_id)
-        data["video"] = video
-        db.update_storage(chat_id, data)
+        
+        db.update_current_material(chat_id, video)
         
         await bot.edit_message_media(
             chat_id=chat_id,

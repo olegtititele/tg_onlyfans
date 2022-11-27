@@ -14,15 +14,19 @@ from telegram import ParseMode
 async def video_callback(call, chat_id, message_id):
     db = DB()
     kb = Keyboards()
+    data = db.get_storage(chat_id)
+    current_material = data["current_material"]
     
     if call.data == "next_video":
         current_bot = db.get_current_bot(chat_id)
         videos = db.get_bot_videos(current_bot)
         
-        if cf.current_material + 1 < len(videos):
-            cf.current_material += 1
+        if current_material + 1 < len(videos):
+            current_material += 1
+            data["current_material"] = current_material
+            db.update_storage(chat_id, data)
             
-            video = videos[cf.current_material][0]
+            video = videos[current_material][0]
             media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
             
             db.update_current_material(chat_id, video)
@@ -31,7 +35,7 @@ async def video_callback(call, chat_id, message_id):
                 chat_id=chat_id,
                 message_id=message_id,
                 media=media,
-                reply_markup=kb.show_videos_kb(cf.current_material + 1, len(videos))
+                reply_markup=kb.show_videos_kb(current_material + 1, len(videos))
             )
             
         return
@@ -40,10 +44,12 @@ async def video_callback(call, chat_id, message_id):
         current_bot = db.get_current_bot(chat_id)
         videos = db.get_bot_videos(current_bot)
         
-        if cf.current_material + 1 > 1:
-            cf.current_material -= 1
+        if current_material + 1 > 1:
+            current_material -= 1
+            data["current_material"] = current_material
+            db.update_storage(chat_id, data)
             
-            video = videos[cf.current_material][0]
+            video = videos[current_material][0]
             media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
             
             
@@ -53,7 +59,7 @@ async def video_callback(call, chat_id, message_id):
                 chat_id=chat_id,
                 message_id=message_id,
                 media=media,
-                reply_markup=kb.show_videos_kb(cf.current_material + 1, len(videos))
+                reply_markup=kb.show_videos_kb(current_material + 1, len(videos))
             )
             
         return
@@ -67,10 +73,12 @@ async def video_callback(call, chat_id, message_id):
         videos = db.get_bot_videos(current_bot)
         
         if len(videos) > 0:
-            if cf.current_material + 1 > 1:
-                cf.current_material -= 1
+            if current_material + 1 > 1:
+                current_material -= 1
+                data["current_material"] = current_material
+                db.update_storage(chat_id, data)
                 
-                video = videos[cf.current_material][0]
+                video = videos[current_material][0]
                 media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
                 
                 db.update_current_material(chat_id, video)
@@ -79,12 +87,14 @@ async def video_callback(call, chat_id, message_id):
                     chat_id=chat_id,
                     message_id=message_id,
                     media=media,
-                    reply_markup=kb.show_videos_kb(cf.current_material + 1, len(videos))
+                    reply_markup=kb.show_videos_kb(current_material + 1, len(videos))
                 )
             else:
-                cf.current_material = 0
+                current_material = 0
+                data["current_material"] = current_material
+                db.update_storage(chat_id, data)
                 
-                video = videos[cf.current_material][0]
+                video = videos[current_material][0]
                 media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
                 
                 db.update_current_material(chat_id, video)
@@ -93,7 +103,7 @@ async def video_callback(call, chat_id, message_id):
                     chat_id=chat_id,
                     message_id=message_id,
                     media=media,
-                    reply_markup=kb.show_videos_kb(cf.current_material + 1, len(videos))
+                    reply_markup=kb.show_videos_kb(current_material + 1, len(videos))
                 )
         else:
             media = types.InputMediaPhoto(media=InputFile("background.jpg"))

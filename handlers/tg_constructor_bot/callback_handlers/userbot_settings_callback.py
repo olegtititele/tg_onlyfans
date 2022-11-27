@@ -27,9 +27,12 @@ async def userbot_settings_callback(call, chat_id, message_id):
                 show_alert=False
             )
             
-        cf.current_material = 0
+        current_material = 0
+        data = db.get_storage(chat_id)
+        data["current_material"] = current_material
+        db.update_storage(chat_id, data)
         
-        photo = images[cf.current_material][0]
+        photo = images[current_material][0]
         media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
         
         
@@ -39,7 +42,7 @@ async def userbot_settings_callback(call, chat_id, message_id):
             chat_id=chat_id,
             message_id=message_id,
             media=media,
-            reply_markup=kb.show_images_kb(cf.current_material + 1, len(images))
+            reply_markup=kb.show_images_kb(current_material + 1, len(images))
         )
         
         return
@@ -55,8 +58,12 @@ async def userbot_settings_callback(call, chat_id, message_id):
                 show_alert=False
             )
         
-        cf.current_material = 0
-        video = videos[cf.current_material][0]
+        current_material = 0
+        data = db.get_storage(chat_id)
+        data["current_material"] = current_material
+        db.update_storage(chat_id, data)
+        
+        video = videos[current_material][0]
         media = types.InputMediaVideo(media=InputFile(f"materials/videos/{video}.mp4"))
         
         
@@ -66,7 +73,7 @@ async def userbot_settings_callback(call, chat_id, message_id):
             chat_id=chat_id,
             message_id=message_id,
             media=media,
-            reply_markup=kb.show_videos_kb(cf.current_material + 1, len(videos))
+            reply_markup=kb.show_videos_kb(current_material + 1, len(videos))
         )
         
         return

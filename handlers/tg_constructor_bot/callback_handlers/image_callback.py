@@ -13,15 +13,19 @@ from telegram import ParseMode
 async def image_callback(call, chat_id, message_id):
     db = DB()
     kb = Keyboards()
-        
+    data = db.get_storage(chat_id)
+    current_material = data["current_material"]
+    
     if call.data == "next_image":
         current_bot = db.get_current_bot(chat_id)
         images = db.get_bot_photos(current_bot)
         
-        if cf.current_material + 1 < len(images):
-            cf.current_material += 1
+        if current_material + 1 < len(images):
+            current_material += 1
+            data["current_material"] = current_material
+            db.update_storage(chat_id, data)
             
-            photo = images[cf.current_material][0]
+            photo = images[current_material][0]
             media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
             
             db.update_current_material(chat_id, photo)
@@ -30,7 +34,7 @@ async def image_callback(call, chat_id, message_id):
                 chat_id=chat_id,
                 message_id=message_id,
                 media=media,
-                reply_markup=kb.show_images_kb(cf.current_material + 1, len(images))
+                reply_markup=kb.show_images_kb(current_material + 1, len(images))
             )
         
         return
@@ -39,10 +43,12 @@ async def image_callback(call, chat_id, message_id):
         current_bot = db.get_current_bot(chat_id)
         images = db.get_bot_photos(current_bot)
         
-        if cf.current_material + 1 > 1:
-            cf.current_material -= 1
+        if current_material + 1 > 1:
+            current_material -= 1
+            data["current_material"] = current_material
+            db.update_storage(chat_id, data)
             
-            photo = images[cf.current_material][0]
+            photo = images[current_material][0]
             media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
             
             db.update_current_material(chat_id, photo)
@@ -51,7 +57,7 @@ async def image_callback(call, chat_id, message_id):
                 chat_id=chat_id,
                 message_id=message_id,
                 media=media,
-                reply_markup=kb.show_images_kb(cf.current_material + 1, len(images))
+                reply_markup=kb.show_images_kb(current_material + 1, len(images))
             )
             
         return
@@ -65,10 +71,12 @@ async def image_callback(call, chat_id, message_id):
         images = db.get_bot_photos(current_bot)
         
         if len(images) > 0:
-            if cf.current_material + 1 > 1:
-                cf.current_material -= 1
+            if current_material + 1 > 1:
+                current_material -= 1
+                data["current_material"] = current_material
+                db.update_storage(chat_id, data)
                 
-                photo = images[cf.current_material][0]
+                photo = images[current_material][0]
                 media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
                 
                 
@@ -78,12 +86,14 @@ async def image_callback(call, chat_id, message_id):
                     chat_id=chat_id,
                     message_id=message_id,
                     media=media,
-                    reply_markup=kb.show_images_kb(cf.current_material + 1, len(images))
+                    reply_markup=kb.show_images_kb(current_material + 1, len(images))
                 )
             else:
-                cf.current_material = 0
+                current_material = 0
+                data["current_material"] = current_material
+                db.update_storage(chat_id, data)
                 
-                photo = images[cf.current_material][0]
+                photo = images[current_material][0]
                 media = types.InputMediaPhoto(media=InputFile(f"materials/photos/{photo}.jpg"))
                 
                 
@@ -93,7 +103,7 @@ async def image_callback(call, chat_id, message_id):
                     chat_id=chat_id,
                     message_id=message_id,
                     media=media,
-                    reply_markup=kb.show_images_kb(cf.current_material + 1, len(images))
+                    reply_markup=kb.show_images_kb(current_material + 1, len(images))
                 )
         else:
             media = types.InputMediaPhoto(media=InputFile("background.jpg"))

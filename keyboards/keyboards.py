@@ -161,6 +161,8 @@ class Keyboards():
 
 	def bot_info_kb(self, chat_id):
 		db = DB()
+		channel_subscription_id_btn = InlineKeyboardButton('⭐️ ID канала', callback_data=f'channel_subscription_id')
+		channel_subscription_link_btn = InlineKeyboardButton('⭐️ Ссылка на канал', callback_data=f'channel_subscription_link')
 		alert_btn = InlineKeyboardButton('📮 Рассылка сообщений', callback_data=f'user_alert')
 		invite_referal_btn = InlineKeyboardButton('💴 Реферал за пользователя', callback_data=f'invite_referal_amount')
 		start_balance_btn = InlineKeyboardButton('💵 Стартовый баланс', callback_data=f'start_balance_amount')
@@ -173,9 +175,13 @@ class Keyboards():
 		back_btn = InlineKeyboardButton('🔙 Назад', callback_data='back_to_user_bots_list')
   
 		kb = InlineKeyboardMarkup()
-		# if db.get_subscription_time(chat_id) > 0:
 		kb.add(show_all_images_btn, show_all_videos_btn)
 		kb.add(alert_btn)
+  
+		if db.get_subscription_time(chat_id) > 0:
+			kb.add(channel_subscription_id_btn)
+			kb.add(channel_subscription_link_btn)
+   
 		kb.add(invite_referal_btn)
 		kb.add(start_balance_btn)
 		kb.add(edit_photo_price_btn)
@@ -183,7 +189,17 @@ class Keyboards():
 		kb.add(upload_material_btn)
 		kb.add(delete_bot_btn)
 		kb.add(back_btn)
-  
+
+		return kb
+
+
+	def subscription_channel_id_kb(self):
+		sub_btn = InlineKeyboardButton('Отключить', callback_data='off_channel_id')
+		back_btn = InlineKeyboardButton('🔙 Назад', callback_data='back_to_user_bot_info')
+		kb = InlineKeyboardMarkup()
+		kb.add(sub_btn)
+		kb.add(back_btn)
+
 		return kb
 
 	def show_images_kb(self, current_material, total_materials):

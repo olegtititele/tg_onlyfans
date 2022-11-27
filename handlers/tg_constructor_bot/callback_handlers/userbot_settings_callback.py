@@ -3,6 +3,7 @@ import os
 import config.config as cf
 from aiogram import types
 from aiogram.types import InputFile
+from config.bot_texts import *
 from config.states import States
 from create_bot import bot
 from db.db import DB
@@ -80,7 +81,48 @@ async def userbot_settings_callback(call, chat_id, message_id):
             parse_mode=ParseMode.HTML,
             reply_markup=kb.back_to_user_bot_info_kb()
         )
+        
+    if call.data == "channel_subscription_id":
+        db.update_state(chat_id, states.channel_subscription_id)
+        link = f'<a href="https://telegra.ph/Kak-sdelat-obyazatelnuyu-podpisku-na-kanal-11-27">Инструкция</a>'
+        
+        return await bot.edit_message_caption(
+            chat_id=chat_id,
+            message_id=message_id,
+            caption=f"<b>{link}\nЕсли вы хотите отключить эту функцию, нажмите на кнопку \"Отключить\".\n\n⤵️ Введите ID канала:</b>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb.subscription_channel_id_kb()
+        )
     
+    if call.data == "channel_subscription_link":
+        db.update_state(chat_id, states.channel_subscription_link)
+        
+        return await bot.edit_message_caption(
+            chat_id=chat_id,
+            message_id=message_id,
+            caption=f"<b>⤵️ Введите ссылку или @username канала/группы в который пользователю нужно будет присоединиться:</b>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb.back_to_user_bot_info_kb()
+        )
+    
+    if call.data == "off_channel_id":
+        current_bot = db.get_current_bot(chat_id)
+        db.update_state(chat_id, states.main_state)
+        db.update_bot_subscription_channel_id(current_bot, None)
+        
+        await bot.answer_callback_query(
+            callback_query_id=call.id,
+            text="Функция отключена!"
+        )
+        
+        return await bot.edit_message_caption(
+            chat_id=chat_id,
+            message_id=message_id,
+            caption=bot_info_text(chat_id, current_bot),
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb.bot_info_kb(chat_id)
+        )
+        
     if call.data == "invite_referal_amount":
         db.update_state(chat_id, states.invite_referal_amount)
 

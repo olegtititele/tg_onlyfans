@@ -25,7 +25,8 @@ callback_handler.register_handlers_client(dp)
 async def bot_on_start():
     db = DB()
     
-    db.add_column()
+    # db.add_column()
+    # db.add_column1()
     db.create_yoomoney_labels_table()
     db.create_bot_information_table()
     db.create_withdrawal_requests_table()

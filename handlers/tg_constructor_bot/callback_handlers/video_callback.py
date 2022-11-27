@@ -107,7 +107,7 @@ async def video_callback(call, chat_id, message_id):
             await bot.edit_message_caption(
                 chat_id=chat_id,
                 message_id=message_id,
-                caption=bot_info_text(current_bot),
+                caption=bot_info_text(chat_id, current_bot),
                 parse_mode=ParseMode.HTML,
                 reply_markup=kb.bot_info_kb(chat_id)
             )

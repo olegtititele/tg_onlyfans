@@ -10,17 +10,29 @@ from payments.YOOMONEY import YooMoney
 
 from .methods import *
 
-menu_keyboard = { "keyboard": [["🖼 Видео", "🖼 Фото"], ["💼 Профиль"], ["💵 Пополнить баланс"]], "resize_keyboard": True}
+menu_keyboard = { "keyboard": [["📹 Видео", "📷 Фото"], ["💼 Профиль"], ["💵 Пополнить баланс"]], "resize_keyboard": True}
 
 async def message_handler(token, message):
     db = DB()
     chat_id = message['message']['from']['id']
     message_text = message['message']['text']
-    bot_username = (await get_me(token))['result']['username']
+    bot_username = (await get_me(token))['username']
+    admin_id = db.get_user_bot_created_by_id(bot_username)
+    
+    if db.get_subscription_time(admin_id) > 0:
+        subscription_channel_id = db.get_bot_subscription_channel_id(bot_username)
+        if not subscription_channel_id is None:
+            user_channel_status = (await get_chat_member(token=token, chat_id=subscription_channel_id, user_id=chat_id))['status']
+            
+            if user_channel_status == 'left':
+                subscription_channel_link = db.get_bot_subscription_channel_link(bot_username)
+                return await send_message(
+                    token=token,
+                    chat_id=chat_id,
+                    text=f"<b>Подпишитесь на канал:  {subscription_channel_link}</b>"
+                )
     
     if "/start" in message_text:
-
-            
         db.update_state_from_user_bot(bot_username, chat_id, "main_state")
         
         if not db.check_if_user_exists_in_user_bot(bot_username, chat_id):
@@ -84,14 +96,14 @@ async def message_handler(token, message):
             return await send_message(
                 token=token,
                 chat_id=chat_id,
-                text=f"<b>Привет, {message['message']['from']['first_name']}</b>\n\n<b>👤 Ваш ID:</b> <code>{chat_id}</code>\n\n<b>💵 Баланс:</b> <code>{balance} ₽</code>\n\n<b>💸 Реф. баланс:</b> <code>{referal_balance} ₽</code>\n\n<b>👤 Приглашено:</b> <code>{invited_users}</code>\nt.me/{bot_username}?start={chat_id}\n\n<b>🖼 Стоимость фото:</b> <code>{photo_price} ₽</code>\n\n<b>🖼 Стоимость видео:</b> <code>{video_price} ₽</code>\n\n<b>Администратор:</b> @{admin}",
+                text=f"<b>Привет, {message['message']['from']['first_name']}</b>\n\n<b>👤 Ваш ID:</b> <code>{chat_id}</code>\n\n<b>💵 Баланс:</b> <code>{balance} ₽</code>\n\n<b>💸 Реф. баланс:</b> <code>{referal_balance} ₽</code>\n\n<b>👤 Приглашено:</b> <code>{invited_users}</code>\nt.me/{bot_username}?start={chat_id}\n\n<b>📷 Стоимость 1 фото:</b> <code>{photo_price} ₽</code>\n\n<b>🎞 Стоимость 1 видео:</b> <code>{video_price} ₽</code>\n\n<b>Администратор:</b> @{admin}",
                 reply_markup=menu_keyboard
             )
         
         return await send_message(
             token=token,
             chat_id=chat_id,
-            text=f"<b>Привет, {message['message']['from']['first_name']}</b>\n\n<b>👤 Ваш ID:</b> <code>{chat_id}</code>\n\n<b>💵 Баланс:</b> <code>{balance} ₽</code>\n\n<b>💸 Реф. баланс:</b> <code>{referal_balance} ₽</code>\n\n<b>👤 Приглашено:</b> <code>{invited_users}</code>\nt.me/{bot_username}?start={chat_id}\n\n<b>🖼 Стоимость фото:</b> <code>{photo_price} ₽</code>\n\n<b>🖼 Стоимость видео:</b> <code>{video_price} ₽</code>\n\n<b>Администратор:</b> @{admin}\n\n<b>⚙️ Бот сделан в @FansBuyBot</b>",
+            text=f"<b>Привет, {message['message']['from']['first_name']}</b>\n\n<b>👤 Ваш ID:</b> <code>{chat_id}</code>\n\n<b>💵 Баланс:</b> <code>{balance} ₽</code>\n\n<b>💸 Реф. баланс:</b> <code>{referal_balance} ₽</code>\n\n<b>👤 Приглашено:</b> <code>{invited_users}</code>\nt.me/{bot_username}?start={chat_id}\n\n<b>📷 Стоимость 1 фото:</b> <code>{photo_price} ₽</code>\n\n<b>🎞 Стоимость 1 видео:</b> <code>{video_price} ₽</code>\n\n<b>Администратор:</b> @{admin}\n\n<b>⚙️ Бот сделан в @FansBuyBot</b>",
             reply_markup=menu_keyboard
         )
         
@@ -110,18 +122,18 @@ async def message_handler(token, message):
             return await send_message(
                 token=token,
                 chat_id=chat_id,
-                text=f"<b><u>Профиль</u></b>\n\n<b>👤 Ваш ID:</b> <code>{chat_id}</code>\n\n<b>💵 Баланс:</b> <code>{balance} ₽</code>\n\n<b>💸 Реф. баланс:</b> <code>{referal_balance} ₽</code>\n\n<b>👤 Приглашено:</b> <code>{invited_users}</code>\nt.me/{bot_username}?start={chat_id}\n\n<b>🖼 Стоимость фото:</b> <code>{photo_price} ₽</code>\n\n<b>🖼 Стоимость видео:</b> <code>{video_price} ₽</code>\n\n<b>Администратор:</b> @{admin}",
+                text=f"<b><u>Профиль</u></b>\n\n<b>👤 Ваш ID:</b> <code>{chat_id}</code>\n\n<b>💵 Баланс:</b> <code>{balance} ₽</code>\n\n<b>💸 Реф. баланс:</b> <code>{referal_balance} ₽</code>\n\n<b>👤 Приглашено:</b> <code>{invited_users}</code>\nt.me/{bot_username}?start={chat_id}\n\n<b>📷 Стоимость 1 фото:</b> <code>{photo_price} ₽</code>\n\n<b>🎞 Стоимость 1 видео:</b> <code>{video_price} ₽</code>\n\n<b>Администратор:</b> @{admin}",
                 reply_markup=menu_keyboard
             )
             
         return await send_message(
             token=token,
             chat_id=chat_id,
-            text=f"<b><u>Профиль</u></b>\n\n<b>👤 Ваш ID:</b> <code>{chat_id}</code>\n\n<b>💵 Баланс:</b> <code>{balance} ₽</code>\n\n<b>💸 Реф. баланс:</b> <code>{referal_balance} ₽</code>\n\n<b>👤 Приглашено:</b> <code>{invited_users}</code>\nt.me/{bot_username}?start={chat_id}\n\n<b>🖼 Стоимость фото:</b> <code>{photo_price} ₽</code>\n\n<b>🖼 Стоимость видео:</b> <code>{video_price} ₽</code>\n\n<b>Администратор:</b> @{admin}\n\n<b>⚙️ Бот сделан в @FansBuyBot</b>",
+            text=f"<b><u>Профиль</u></b>\n\n<b>👤 Ваш ID:</b> <code>{chat_id}</code>\n\n<b>💵 Баланс:</b> <code>{balance} ₽</code>\n\n<b>💸 Реф. баланс:</b> <code>{referal_balance} ₽</code>\n\n<b>👤 Приглашено:</b> <code>{invited_users}</code>\nt.me/{bot_username}?start={chat_id}\n\n<b>📷 Стоимость 1 фото:</b> <code>{photo_price} ₽</code>\n\n<b>🎞 Стоимость 1 видео:</b> <code>{video_price} ₽</code>\n\n<b>Администратор:</b> @{admin}\n\n<b>⚙️ Бот сделан в @FansBuyBot</b>",
             reply_markup=menu_keyboard
         )
         
-    elif message_text == "🖼 Фото":
+    elif "фото" in message_text.lower():
         
         bot_photos = db.get_bot_photos(bot_username)
         balance = db.get_balance_from_user_bot(bot_username, chat_id)
@@ -159,9 +171,11 @@ async def message_handler(token, message):
                             viewed_users.append(str(chat_id))
                             db.update_viewed_users_on_photo(photo[0], viewed_users)
                             
-                            data = {'chat_id': str(chat_id), 'photo': open(f'materials/photos/{photo[0]}.jpg', 'rb')}
-                            
-                            return await send_photo(token, data)
+                            return await send_photo(
+                                token=token,
+                                chat_id=str(chat_id),
+                                photo=open(f'materials/photos/{photo[0]}.jpg', 'rb')
+                            )
                 else:        
                     if balance < photo_price:
                         return await send_message(
@@ -207,7 +221,7 @@ async def message_handler(token, message):
                     reply_markup=menu_keyboard
                 )
         
-    elif message_text == "🖼 Видео":
+    elif "видео" in message_text.lower():
         db.update_state_from_user_bot(bot_username, chat_id, "main_state")
         
         bot_videos = db.get_bot_videos(bot_username)
@@ -247,9 +261,11 @@ async def message_handler(token, message):
                             viewed_users.append(str(chat_id))
                             db.update_viewed_users_on_video(video[0], viewed_users)
                             
-                            data = {'chat_id': str(chat_id), 'video':  open(f'materials/videos/{video[0]}.mp4', 'rb')}
-                            
-                            return await send_video(token, data)
+                            return await send_video(
+                                token=token,
+                                chat_id=str(chat_id),
+                                video=open(f'materials/videos/{video[0]}.mp4', 'rb')
+                            )
                 else:
                     if balance < video_price:
                         return await send_message(

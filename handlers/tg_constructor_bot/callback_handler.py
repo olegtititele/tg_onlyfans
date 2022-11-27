@@ -384,7 +384,7 @@ async def callback_handler(call: types.CallbackQuery):
                         await bot.edit_message_text(
                             chat_id=chat_id,
                             message_id=message_id,
-                            text=bot_info_text(current_bot),
+                            text=bot_info_text(chat_id, current_bot),
                             parse_mode=ParseMode.HTML,
                             reply_markup=kb.back_to_all_bots_list_kb()
                         )
@@ -392,7 +392,7 @@ async def callback_handler(call: types.CallbackQuery):
                         await bot.edit_message_caption(
                             chat_id=chat_id,
                             message_id=message_id,
-                            caption=bot_info_text(current_bot),
+                            caption=bot_info_text(chat_id, current_bot),
                             parse_mode=ParseMode.HTML,
                             reply_markup=kb.bot_info_kb(chat_id)
                         )

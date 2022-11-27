@@ -8,4 +8,4 @@ scroll_buttons_callback_data = ["previous_withdrawal_requests_list", "next_withd
 
 admin_callback_data = ["popup_in_this_bot", "popup_in_another_bot"]
 
-userbot_settings_callback_data = ["show_all_images", "show_all_videos", "edit_photo_price", "edit_video_price", "upload_material", "delete_bot", "user_alert", "invite_referal_amount", "start_balance_amount"]
+userbot_settings_callback_data = ["show_all_images", "show_all_videos", "edit_photo_price", "edit_video_price", "upload_material", "delete_bot", "user_alert", "invite_referal_amount", "start_balance_amount", "channel_subscription_id", "channel_subscription_link", "off_channel_id"]

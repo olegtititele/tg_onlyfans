@@ -20,7 +20,7 @@ async def run(token):
         update_id = 0
         
     try:
-        bot_username = (await get_me(token))['result']['username']
+        bot_username = (await get_me(token))['username']
     except KeyError:
         return
     

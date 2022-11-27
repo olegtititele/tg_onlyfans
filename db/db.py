@@ -6,12 +6,17 @@ from dateutil.parser import parse
 class DB():
 
     def __init__(self):
-        self.connection = mysql.connector.connect(user='fans_buy', password='AdminNeSoset3.', host='localhost', database='fans_buy_database')
+        self.connection = mysql.connector.connect(user='sqliter_user', password='Admin2709!', host='localhost', database='fans_buy_database')
 
     
     def add_column(self):
         cursor = self.connection.cursor()
-        cursor.execute("ALTER TABLE users ADD current_material TEXT;")
+        cursor.execute("ALTER TABLE users_bots ADD subscription_channel_id TEXT;")
+        self.connection.commit()
+        
+    def add_column1(self):
+        cursor = self.connection.cursor()
+        cursor.execute("ALTER TABLE users_bots ADD subscription_channel_link TEXT;")
         self.connection.commit()
 
     # # user
@@ -254,11 +259,13 @@ class DB():
         
         
         
+        
+        
     # # user_bot table
     
     def create_users_bots_table(self):
         cursor = self.connection.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS users_bots (bot_username TEXT, token TEXT, created_by_id BIGINT, created_by_username TEXT, created_time TIMESTAMP, photo_price REAL, video_price REAL, referal_sum REAL, invited_ref_sum REAL);''')
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS users_bots (bot_username TEXT, token TEXT, created_by_id BIGINT, created_by_username TEXT, created_time TIMESTAMP, photo_price REAL, video_price REAL, referal_sum REAL, invited_ref_sum REAL, subscription_channel_id TEXT, subscription_channel_link TEXT);''')
         self.connection.commit()
         
     def add_new_bot(self, bot_username, token, created_by_id, created_by_username):
@@ -267,14 +274,42 @@ class DB():
         video_price = 10
         referal_sum = 20
         invited_ref_sum = 20
+        subscription_channel_id = None
+        subscription_channel_link = None
         cursor = self.connection.cursor()
-        cursor.execute("INSERT INTO users_bots VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (bot_username, token, created_by_id, created_by_username, created_time, photo_price, video_price, referal_sum, invited_ref_sum, ))
+        cursor.execute("INSERT INTO users_bots VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (bot_username, token, created_by_id, created_by_username, created_time, photo_price, video_price, referal_sum, invited_ref_sum, subscription_channel_id, subscription_channel_link, ))
         self.connection.commit()
         
     def delete_user_bot(self, bot_username):
         cursor = self.connection.cursor()
         cursor.execute("DELETE FROM users_bots WHERE bot_username = %s;", (bot_username, ))
         self.connection.commit()
+        
+    
+    def get_bot_subscription_channel_id(self, bot_username):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT subscription_channel_id FROM users_bots WHERE bot_username = %s;", (bot_username,))
+        data = cursor.fetchone()[0]
+        
+        return data
+    
+    def update_bot_subscription_channel_id(self, bot_username, subscription_channel_id):
+        cursor = self.connection.cursor()
+        cursor.execute("UPDATE users_bots SET subscription_channel_id = %s WHERE bot_username = %s", (subscription_channel_id, bot_username,))
+        self.connection.commit()
+    
+    def get_bot_subscription_channel_link(self, bot_username):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT subscription_channel_link FROM users_bots WHERE bot_username = %s;", (bot_username,))
+        data = cursor.fetchone()[0]
+        
+        return data
+    
+    def update_bot_subscription_channel_link(self, bot_username, subscription_channel_link):
+        cursor = self.connection.cursor()
+        cursor.execute("UPDATE users_bots SET subscription_channel_link = %s WHERE bot_username = %s", (subscription_channel_link, bot_username,))
+        self.connection.commit()
+        
         
     def get_bot_referal_sum(self, bot_username):
         cursor = self.connection.cursor()
@@ -287,6 +322,7 @@ class DB():
         cursor = self.connection.cursor()
         cursor.execute("UPDATE users_bots SET referal_sum = %s WHERE bot_username = %s", (referal_sum, bot_username,))
         self.connection.commit()
+        
         
     def get_bot_invited_ref_sum(self, bot_username):
         cursor = self.connection.cursor()
@@ -816,7 +852,7 @@ class DB():
     def get_referal_balance_from_user_bot(self, bot_username, user_id):
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT referal_balance FROM {bot_username} WHERE user_id = '%s';", (user_id,))
-        data = round(cursor.fetchone()[0], 2)
+        data = cursor.fetchone()[0]
         return data
 
     def update_referal_balance_from_user_bot(self, bot_username, user_id, balance):

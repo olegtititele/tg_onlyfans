@@ -16,6 +16,8 @@ import states.user_bot_states.user_bot_alert_state as user_bot_alert_state
 import states.user_bot_states.video_price_state as video_price_state
 import states.user_bot_states.invite_referal_amount_state as invite_referal_amount_state
 import states.user_bot_states.start_balance_amount_state as start_balance_amount_state
+import states.user_bot_states.channel_subscription_id_state as channel_subscription_id_state
+import states.user_bot_states.channel_subscription_link_state as channel_subscription_link_state
 
 from aiogram import Dispatcher, types
 from aiogram.types import InputFile
@@ -54,7 +56,6 @@ async def message_handler(message: types.Message):
         db.update_state(chat_id, states.main_state)
         photo = InputFile("background.jpg")
         
-        
         return await bot.send_photo(
             chat_id=chat_id, 
             photo=photo,
@@ -73,8 +74,6 @@ async def message_handler(message: types.Message):
             text=f"<b><u>Реферальная система</u></b>\n\n<b>🫂 Приглашайте друзей и зарабатывайте {db.get_referal_bonus()}% с комиссии!</b>\n\n<b>{ref_link}</b>",
             parse_mode=ParseMode.HTML
         )
-        
-        
         
     elif message.text == "🤖 Мои боты 🤖":
         cf.page = 1
@@ -200,6 +199,12 @@ async def message_handler(message: types.Message):
     elif current_state == states.start_balance_amount:
         await start_balance_amount_state.message_handler(message, chat_id)
     
+    elif current_state == states.channel_subscription_id:
+        await channel_subscription_id_state.message_handler(message, chat_id)
+        
+    elif current_state == states.channel_subscription_link:
+        await channel_subscription_link_state.message_handler(message, chat_id)
+        
     else:
         return
   

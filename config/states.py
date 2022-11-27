@@ -12,6 +12,8 @@ class States():
     upload_material = "upload_material"
     photo_price_state = "photo_price_state"
     video_price_state = "video_price_state"
+    channel_subscription_id = "channel_subscription_id"
+    channel_subscription_link = "channel_subscription_link"
     
     # admin
     alert = "alert"

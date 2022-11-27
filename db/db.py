@@ -6,7 +6,7 @@ from dateutil.parser import parse
 class DB():
 
     def __init__(self):
-        self.connection = mysql.connector.connect(user='sqliter_user', password='Admin2709!', host='localhost', database='fans_buy_database')
+        self.connection = mysql.connector.connect(user='fans_buy', password='AdminNeSoset3.', host='localhost', database='fans_buy_database')
 
     
     def add_column(self):
